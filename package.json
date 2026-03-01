@@ -1,0 +1,75 @@
+{
+  "name": "kafka-suite",
+  "version": "1.0.0",
+  "description": "Kafka Suite - Desktop Kafka Cluster Manager",
+  "main": "dist-electron/index.js",
+  "scripts": {
+    "dev:renderer": "vite --config vite.config.ts",
+    "dev:main": "tsc -p tsconfig.main.json --watch",
+    "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:main\"",
+    "build:renderer": "vite build --config vite.config.ts",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build": "npm run build:renderer && npm run build:main",
+    "start": "electron .",
+    "electron:dev": "concurrently \"npm run dev:renderer\" \"wait-on http://localhost:5173 && tsc -p tsconfig.main.json && electron .\"",
+    "dist": "npm run build && electron-builder --win",
+    "dist:portable": "npm run build && electron-builder --win portable"
+  },
+  "keywords": [
+    "kafka",
+    "electron",
+    "monitoring"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "build": {
+    "appId": "com.kafkasuite.app",
+    "productName": "Kafka Suite",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "dist-renderer/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "electron-store": "^8.2.0",
+    "kafkajs": "^2.2.4",
+    "lucide-react": "^0.575.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "autoprefixer": "^10.4.27",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "concurrently": "^9.2.1",
+    "electron": "^40.6.1",
+    "electron-builder": "^26.8.1",
+    "postcss": "^8.5.6",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "wait-on": "^9.0.4"
+  }
+}

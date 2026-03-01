@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kafka Monitoring Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4287f5",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101722",
+                        "surface-dark": "#1e293b",
+                        "surface-darker": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+        .json-key { color: #93c5fd; }
+        .json-string { color: #86efac; }
+        .json-number { color: #fca5a5; }
+        .json-boolean { color: #fcd34d; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display antialiased overflow-hidden h-screen flex">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+<div class="bg-surface-darker w-full max-w-2xl rounded-[16px] shadow-2xl border border-slate-700/50 flex flex-col relative overflow-hidden">
+<div class="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-surface-darker">
+<h2 class="text-xl font-bold text-white">Add New Cluster</h2>
+<button class="text-slate-400 hover:text-white transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="bg-surface-dark/30 px-8 py-4 border-b border-slate-800">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400 text-sm font-semibold">1</div>
+<span class="text-sm font-medium text-slate-400">General Info</span>
+</div>
+<div class="h-px flex-1 bg-slate-700 mx-4"></div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-blue-900/40">2</div>
+<span class="text-sm font-semibold text-white">Connection Details</span>
+</div>
+<div class="h-px flex-1 bg-slate-700 mx-4"></div>
+<div class="flex items-center gap-3 opacity-50">
+<div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400 text-sm font-semibold">3</div>
+<span class="text-sm font-medium text-slate-400">Security</span>
+</div>
+</div>
+</div>
+<div class="p-8 space-y-6 bg-surface-darker">
+<div class="bg-red-500/10 border border-red-500 rounded-lg p-4 flex items-start gap-4">
+<span class="material-symbols-outlined text-red-500 text-2xl shrink-0">error</span>
+<div class="space-y-3 w-full">
+<div>
+<h3 class="text-red-400 font-semibold text-sm">Connection Failed</h3>
+<p class="text-red-300/80 text-sm mt-1">Timeout while connecting to <span class="font-mono bg-red-500/10 px-1 rounded text-red-200">bootstrap-server:9092</span></p>
+</div>
+<div class="bg-surface-darker/50 rounded p-3 border border-red-500/20">
+<h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Troubleshooting</h4>
+<ul class="space-y-1.5">
+<li class="flex items-center gap-2 text-sm text-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    Check network connectivity
+                </li>
+<li class="flex items-center gap-2 text-sm text-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    Verify security protocols
+                </li>
+<li class="flex items-center gap-2 text-sm text-slate-300">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    Ensure broker is reachable
+                </li>
+</ul>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block text-sm font-medium text-slate-300 mb-1.5">Bootstrap Servers</label>
+<div class="relative">
+<input class="w-full bg-slate-800/50 border border-red-500/50 text-white text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block p-2.5 placeholder-slate-500 pr-10" placeholder="host:port,host:port" type="text" value="bootstrap-server:9092"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-red-500 text-lg">warning</span>
+</div>
+</div>
+<p class="mt-1 text-xs text-red-400">Failed to resolve host.</p>
+</div>
+</div>
+</div>
+<div class="px-8 py-5 border-t border-slate-800 bg-surface-dark/30 flex justify-between items-center">
+<button class="text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    Back
+                </button>
+<div class="flex gap-3">
+<button class="text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors border border-slate-700 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">terminal</span>
+    View Logs
+</button>
+<button class="text-slate-400 text-sm font-semibold px-4 py-2 rounded-lg bg-slate-800/50 cursor-not-allowed border border-slate-700 flex items-center gap-2 opacity-60" disabled="">
+<span class="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+    Retrying...
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="w-64 h-full bg-surface-darker border-r border-slate-800 flex flex-col shrink-0 blur-[2px]">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-lg text-primary">
+<span class="material-symbols-outlined">monitoring</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-base font-bold text-white tracking-wide">Kafka Monitor</h1>
+<p class="text-xs text-slate-400">v2.1.0</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-3 py-2 space-y-6">
+<div>
+<p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Platform</p>
+<ul class="space-y-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Overview</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] fill-1">dns</span>
+<span class="text-sm font-medium">Clusters</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">topic</span>
+<span class="text-sm font-medium">Topics</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="text-sm font-medium">Consumers</span>
+</a>
+</li>
+</ul>
+</div>
+<div>
+<p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Active Clusters</p>
+<ul class="space-y-1">
+<li>
+<a class="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-800/50 text-white border border-slate-700/50" href="#">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+<span class="text-sm font-medium">Production-East</span>
+</div>
+</a>
+</li>
+<li>
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/30 transition-colors" href="#">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-amber-500"></div>
+<span class="text-sm font-medium">Staging-01</span>
+</div>
+</a>
+</li>
+<li>
+<a class="flex items-center justify-between px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/30 transition-colors" href="#">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-slate-500"></div>
+<span class="text-sm font-medium">Local-Dev</span>
+</div>
+</a>
+</li>
+</ul>
+</div>
+</div>
+<div class="p-4 border-t border-slate-800">
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-blue-900/20">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>Add New Cluster</span>
+</button>
+</div>
+</div>
+<div class="flex-1 flex flex-col min-w-0 bg-background-dark relative blur-[2px]">
+<header class="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-background-dark/80 backdrop-blur sticky top-0 z-20">
+<div class="flex items-center gap-3 text-sm">
+<a class="text-slate-400 hover:text-white transition-colors font-medium" href="#">Clusters</a>
+<span class="material-symbols-outlined text-slate-600 text-[16px]">chevron_right</span>
+<span class="text-white font-semibold bg-slate-800 px-2 py-0.5 rounded text-xs tracking-wide">Production-East</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+</div>
+<input class="bg-surface-dark text-white text-sm rounded-lg block w-80 pl-10 p-2.5 border border-slate-700 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="Search topics, partitions or messages..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<kbd class="inline-flex items-center border border-slate-600 rounded px-2 text-xs font-sans font-medium text-slate-400">⌘K</kbd>
+</div>
+</div>
+<div class="h-6 w-px bg-slate-700 mx-2"></div>
+<button class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Refresh">
+<span class="material-symbols-outlined">refresh</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors relative" title="Notifications">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-background-dark"></span>
+</button>
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-purple-500 p-0.5 ml-2 cursor-pointer" data-alt="User Avatar Gradient">
+<div class="w-full h-full rounded-full bg-background-dark flex items-center justify-center text-xs font-bold text-white">JD</div>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-6 space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-surface-dark border border-slate-700/50 p-4 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 text-sm font-medium">Brokers Online</span>
+<span class="material-symbols-outlined text-emerald-500 text-[20px]">check_circle</span>
+</div>
+<div class="text-2xl font-bold text-white">3<span class="text-slate-500 text-lg font-normal">/3</span></div>
+</div>
+<div class="bg-surface-dark border border-slate-700/50 p-4 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 text-sm font-medium">Total Topics</span>
+<span class="material-symbols-outlined text-primary text-[20px]">topic</span>
+</div>
+<div class="text-2xl font-bold text-white">142</div>
+</div>
+<div class="bg-surface-dark border border-slate-700/50 p-4 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 text-sm font-medium">Incoming Rate</span>
+<span class="material-symbols-outlined text-amber-500 text-[20px]">speed</span>
+</div>
+<div class="text-2xl font-bold text-white">4.2k <span class="text-slate-500 text-xs font-normal">msg/sec</span></div>
+</div>
+<div class="bg-surface-dark border border-slate-700/50 p-4 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-slate-400 text-sm font-medium">Consumer Lag</span>
+<span class="material-symbols-outlined text-red-400 text-[20px]">warning</span>
+</div>
+<div class="text-2xl font-bold text-white">128 <span class="text-slate-500 text-xs font-normal">ms</span></div>
+</div>
+</div>
+<div class="bg-surface-dark border border-slate-700/50 rounded-xl overflow-hidden flex flex-col shadow-xl shadow-black/20">
+<div class="px-6 py-4 border-b border-slate-700/50 flex items-center justify-between bg-surface-darker/30">
+<h2 class="text-lg font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">table_chart</span>
+                        Topic Explorer
+                    </h2>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-sm font-medium transition-colors border border-slate-700">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            Filter
+                        </button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-sm font-medium transition-colors border border-primary/20">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            New Topic
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-700/50 text-xs uppercase tracking-wider text-slate-400 font-semibold bg-slate-800/20">
+<th class="px-6 py-4 font-medium">Topic Name</th>
+<th class="px-6 py-4 font-medium">Status</th>
+<th class="px-6 py-4 font-medium">Partitions</th>
+<th class="px-6 py-4 font-medium">Replicas</th>
+<th class="px-6 py-4 font-medium text-right">Message Count</th>
+<th class="px-6 py-4 font-medium text-right">Size</th>
+<th class="px-6 py-4 font-medium w-10"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-700/50 text-sm text-slate-300">
+<tr class="group hover:bg-slate-800/30 transition-colors cursor-pointer bg-primary/5">
+<td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">folder</span>
+                                    user-activity-log
+                                </td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Healthy
+                                    </span>
+</td>
+<td class="px-6 py-4">12</td>
+<td class="px-6 py-4">3</td>
+<td class="px-6 py-4 text-right font-mono text-white">8,492,102</td>
+<td class="px-6 py-4 text-right text-slate-400">1.2 GB</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-slate-800/30 transition-colors cursor-pointer">
+<td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500 text-[18px]">folder</span>
+                                    payment-transactions
+                                </td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                        Healthy
+                                    </span>
+</td>
+<td class="px-6 py-4">6</td>
+<td class="px-6 py-4">3</td>
+<td class="px-6 py-4 text-right font-mono text-white">142,500</td>
+<td class="px-6 py-4 text-right text-slate-400">245 MB</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="group hover:bg-slate-800/30 transition-colors cursor-pointer">
+<td class="px-6 py-4 font-medium text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-500 text-[18px]">folder</span>
+                                    notifications-email
+                                </td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                        Rebalancing
+                                    </span>
+</td>
+<td class="px-6 py-4">24</td>
+<td class="px-6 py-4">3</td>
+<td class="px-6 py-4 text-right font-mono text-white">45,120</td>
+<td class="px-6 py-4 text-right text-slate-400">89 MB</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="relative flex items-center justify-center w-8 h-8">
+<span class="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-20 animate-ping"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+</div>
+<h2 class="text-lg font-bold text-white">Live Stream: <span class="font-mono text-primary text-base">user-activity-log</span></h2>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-700">
+<span class="material-symbols-outlined">pause</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-700">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+<div class="bg-surface-dark border border-slate-700/50 rounded-xl p-4 font-mono text-sm shadow-sm relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex justify-between items-start mb-3 border-b border-slate-800 pb-2">
+<div class="flex gap-4">
+<span class="text-slate-500">Offset: <span class="text-slate-300">49102</span></span>
+<span class="text-slate-500">Partition: <span class="text-slate-300">0</span></span>
+</div>
+<span class="text-xs text-slate-500">2023-10-27 14:23:12.450</span>
+</div>
+<div class="overflow-x-auto">
+<pre class="text-slate-300">{
+  <span class="json-key">"event_id"</span>: <span class="json-string">"evt_892310"</span>,
+  <span class="json-key">"user_id"</span>: <span class="json-number">4812</span>,
+  <span class="json-key">"action"</span>: <span class="json-string">"button_click"</span>,
+  <span class="json-key">"metadata"</span>: {
+    <span class="json-key">"page"</span>: <span class="json-string">"/dashboard/settings"</span>,
+    <span class="json-key">"element"</span>: <span class="json-string">"save_btn"</span>,
+    <span class="json-key">"success"</span>: <span class="json-boolean">true</span>
+  }
+}
+</pre>
+</div>
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-slate-400 hover:text-white bg-slate-800 rounded">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-dark border border-slate-700/50 rounded-xl p-4 font-mono text-sm shadow-sm relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+<div class="flex justify-between items-start mb-3 border-b border-slate-800 pb-2">
+<div class="flex gap-4">
+<span class="text-slate-500">Offset: <span class="text-slate-300">49103</span></span>
+<span class="text-slate-500">Partition: <span class="text-slate-300">2</span></span>
+</div>
+<span class="text-xs text-slate-500">2023-10-27 14:23:12.890</span>
+</div>
+<div class="overflow-x-auto">
+<pre class="text-slate-300">{
+  <span class="json-key">"event_id"</span>: <span class="json-string">"evt_892311"</span>,
+  <span class="json-key">"user_id"</span>: <span class="json-number">2291</span>,
+  <span class="json-key">"action"</span>: <span class="json-string">"page_view"</span>,
+  <span class="json-key">"metadata"</span>: {
+    <span class="json-key">"page"</span>: <span class="json-string">"/billing"</span>,
+    <span class="json-key">"referrer"</span>: <span class="json-string">"email_campaign"</span>,
+    <span class="json-key">"session_duration"</span>: <span class="json-number">45.2</span>
+  }
+}
+</pre>
+</div>
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-slate-400 hover:text-white bg-slate-800 rounded">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Detailed Connection Logs View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4287f5",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f172a", // Deep slate as requested
+                        "surface-dark": "#1e293b",
+                        "surface-dark-2": "#334155",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Scrollbar for the terminal look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-4 lg:p-10 relative overflow-hidden">
+<!-- Background overlay effect to simulate modal focus -->
+<div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm z-0"></div>
+<!-- Main Modal Container -->
+<div class="relative z-10 w-full max-w-[1024px] flex flex-col h-[85vh] bg-white dark:bg-[#0f172a] rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex-1">
+<!-- Header -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50 dark:bg-[#152033]">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-8 h-8 rounded bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-xl">terminal</span>
+</div>
+<div>
+<h2 class="text-base font-semibold leading-tight tracking-tight text-slate-900 dark:text-white">Connection Logs</h2>
+<p class="text-xs text-slate-500 dark:text-slate-400">Production-East • Kafka Broker 1</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#334155] transition-colors text-slate-700 dark:text-slate-200">
+<span class="material-symbols-outlined text-[16px]">content_copy</span>
+                    Copy to Clipboard
+                </button>
+<button class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-200 dark:hover:bg-[#334155] text-slate-500 dark:text-slate-400 transition-colors">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+</header>
+<!-- Toolbar / Filter Bar -->
+<div class="flex flex-col sm:flex-row gap-4 px-6 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] items-center">
+<!-- Search Input -->
+<div class="relative flex-1 w-full">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-lg bg-slate-100 dark:bg-[#1e293b] border-none text-sm text-slate-900 dark:text-slate-200 placeholder-slate-500 focus:ring-2 focus:ring-primary/50" placeholder="Filter logs by keyword or regex..." type="text"/>
+</div>
+<!-- Filter Chips -->
+<div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-primary text-white shadow-sm whitespace-nowrap">
+<span class="material-symbols-outlined text-[16px]">list</span>
+                    All Logs
+                </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-[#1e293b] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#334155] border border-transparent dark:border-slate-700 whitespace-nowrap transition-colors">
+<span class="material-symbols-outlined text-[16px] text-red-500">error</span>
+                    Errors
+                </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-[#1e293b] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#334155] border border-transparent dark:border-slate-700 whitespace-nowrap transition-colors">
+<span class="material-symbols-outlined text-[16px] text-amber-500">warning</span>
+                    Warnings
+                </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-[#1e293b] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#334155] border border-transparent dark:border-slate-700 whitespace-nowrap transition-colors">
+<span class="material-symbols-outlined text-[16px] text-blue-400">info</span>
+                    Info
+                </button>
+</div>
+</div>
+<!-- Terminal Content Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar bg-[#0b1221] p-4 font-mono text-sm leading-relaxed">
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:01]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Initializing connection to bootstrap server...</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:01]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Loading configuration properties from /etc/kafka/consumer.properties</span>
+</div>
+<!-- Log Entry: DEBUG -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group opacity-70">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:02]</span>
+<span class="text-purple-400 font-bold shrink-0 w-16">DEBUG</span>
+<span class="text-slate-400">DNS resolution started for kafka-broker-1.internal</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:02]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Handshake successful. Session ID: <span class="text-green-400">7f8a9d12</span></span>
+</div>
+<!-- Log Entry: WARN -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:04]</span>
+<span class="text-amber-400 font-bold shrink-0 w-16">WARN</span>
+<span class="text-amber-100">High latency detected on topic 'orders-stream'. Round-trip time: 450ms</span>
+</div>
+<!-- Log Entry: ERROR -->
+<div class="flex items-start gap-3 py-1 bg-red-500/10 border-l-2 border-red-500 pl-2 pr-2 my-1 rounded-r">
+<span class="text-red-300/70 shrink-0 select-none w-[160px]">[2023-10-27 14:22:05]</span>
+<span class="text-red-500 font-bold shrink-0 w-16">ERROR</span>
+<span class="text-red-200">Connection timeout on port 9092. The remote host is not responding.</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:06]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Attempting automatic reconnection strategy (Exponential Backoff)</span>
+</div>
+<!-- Log Entry: WARN -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:06]</span>
+<span class="text-amber-400 font-bold shrink-0 w-16">WARN</span>
+<span class="text-amber-100">Retrying connection (1/3)...</span>
+</div>
+<!-- Log Entry: DEBUG -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group opacity-70">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:08]</span>
+<span class="text-purple-400 font-bold shrink-0 w-16">DEBUG</span>
+<span class="text-slate-400">Refreshing metadata for 12 topics</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:10]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Connection established successfully. Rebalancing consumer group...</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:11]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Assigned partitions: orders-0, orders-1, payments-0</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:12]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Beginning offset fetch...</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group">
+<span class="text-slate-500 shrink-0 select-none w-[160px]">[2023-10-27 14:22:15]</span>
+<span class="text-blue-400 font-bold shrink-0 w-16">INFO</span>
+<span class="text-slate-300">Consumer loop started. Listening for messages...</span>
+</div>
+<!-- Log Entry: ERROR -->
+<div class="flex items-start gap-3 py-1 bg-red-500/10 border-l-2 border-red-500 pl-2 pr-2 my-1 rounded-r">
+<span class="text-red-300/70 shrink-0 select-none w-[160px]">[2023-10-27 14:22:20]</span>
+<span class="text-red-500 font-bold shrink-0 w-16">ERROR</span>
+<span class="text-red-200">Failed to commit offset for partition orders-1. Request timed out.</span>
+</div>
+<!-- Log Entry: INFO -->
+<div class="flex items-start gap-3 py-1 hover:bg-[#1e293b]/50 rounded px-2 group border-t border-slate-800 mt-2 pt-2">
+<span class="text-green-500/50 w-full text-center text-xs italic">-- Live Log Stream Active --</span>
+</div>
+</div>
+<!-- Footer / Action Bar -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-[#152033] border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+<div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Connected
+                <span class="mx-1 text-slate-300 dark:text-slate-600">|</span>
+                1,245 lines loaded
+            </div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white dark:bg-[#1e293b] text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#334155] transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Download Logs
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+                    Refresh
+                </button>
+</div>
+</div>
+</div>
+</body></html>

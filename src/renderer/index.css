@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+    --color-primary: #4287f5;
+    --color-background-dark: #101722;
+    --color-surface-dark: #1e293b;
+    --color-surface-darker: #0f172a;
+    --font-family-display: "Inter", sans-serif;
+    --font-family-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* JSON syntax highlighting */
+.json-key {
+    color: #93c5fd;
+}
+
+.json-string {
+    color: #86efac;
+}
+
+.json-number {
+    color: #fca5a5;
+}
+
+.json-boolean {
+    color: #fcd34d;
+}
+
+.json-null {
+    color: #94a3b8;
+}
