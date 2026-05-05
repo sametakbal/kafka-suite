@@ -65,32 +65,33 @@ export function Sidebar({
                             </li>
                         )}
                         {connections.map((conn) => (
-                            <li key={conn.id}>
-                                <button
-                                    onClick={() => onSelectConnection(conn.id)}
-                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors group ${selectedConnectionId === conn.id
-                                            ? 'bg-slate-800/50 text-white border border-slate-700/50'
-                                            : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
+                            <li key={conn.id} className="group">
+                                <div
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${selectedConnectionId === conn.id
+                                        ? 'bg-slate-800/50 text-white border border-slate-700/50'
+                                        : 'text-slate-400 hover:text-white hover:bg-slate-800/30'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-3 min-w-0">
+                                    <button
+                                        type="button"
+                                        onClick={() => onSelectConnection(conn.id)}
+                                        className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                                    >
                                         <div
                                             className={`w-2 h-2 rounded-full shrink-0 ${conn.status === 'connected'
-                                                    ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                                                    : conn.status === 'error'
-                                                        ? 'bg-red-500'
-                                                        : 'bg-slate-500'
+                                                ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                                                : conn.status === 'error'
+                                                    ? 'bg-red-500'
+                                                    : 'bg-slate-500'
                                                 }`}
                                         />
                                         <span className="text-sm font-medium truncate">{conn.name}</span>
-                                    </div>
+                                    </button>
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                                         {conn.status === 'connected' && (
                                             <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    onDisconnect(conn.id);
-                                                }}
+                                                type="button"
+                                                onClick={() => onDisconnect(conn.id)}
                                                 className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-amber-400"
                                                 title="Disconnect"
                                             >
@@ -98,17 +99,15 @@ export function Sidebar({
                                             </button>
                                         )}
                                         <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDeleteConnection(conn.id);
-                                            }}
+                                            type="button"
+                                            onClick={() => onDeleteConnection(conn.id)}
                                             className="p-1 hover:bg-slate-700 rounded text-slate-400 hover:text-red-400"
                                             title="Delete"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                </button>
+                                </div>
                             </li>
                         ))}
                     </ul>
@@ -143,8 +142,8 @@ function NavItem({
             <a
                 href="#"
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                     }`}
             >
                 {icon}
