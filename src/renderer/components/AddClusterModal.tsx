@@ -56,7 +56,7 @@ export function AddClusterModal({ onClose, onAdd, isLoading }: AddClusterModalPr
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-[#0f172a] w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden">
+            <div className="bg-[#0f172a] w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl border border-slate-700/50 flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-slate-800 flex justify-between items-center">
                     <h2 className="text-xl font-bold text-white">Add New Cluster</h2>
@@ -69,47 +69,7 @@ export function AddClusterModal({ onClose, onAdd, isLoading }: AddClusterModalPr
                 </div>
 
                 {/* Form */}
-                <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
-                    {/* Error Banner */}
-                    {testStatus === 'error' && testError && (
-                        <div className="bg-red-500/10 border border-red-500 rounded-lg p-4 flex items-start gap-4">
-                            <AlertCircle className="w-6 h-6 text-red-500 shrink-0" />
-                            <div className="space-y-2 w-full">
-                                <h3 className="text-red-400 font-semibold text-sm">Connection Failed</h3>
-                                <p className="text-red-300/80 text-sm">{testError}</p>
-                                <div className="bg-[#0f172a]/50 rounded p-3 border border-red-500/20">
-                                    <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                                        Troubleshooting
-                                    </h4>
-                                    <ul className="space-y-1.5">
-                                        <li className="flex items-center gap-2 text-sm text-slate-300">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                                            Check network connectivity
-                                        </li>
-                                        <li className="flex items-center gap-2 text-sm text-slate-300">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                                            Verify broker address and port
-                                        </li>
-                                        <li className="flex items-center gap-2 text-sm text-slate-300">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                                            Ensure security protocols match
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Success Banner */}
-                    {testStatus === 'success' && (
-                        <div className="bg-emerald-500/10 border border-emerald-500/50 rounded-lg p-4 flex items-center gap-3">
-                            <CheckCircle className="w-5 h-5 text-emerald-500" />
-                            <p className="text-emerald-300 text-sm font-medium">
-                                Connection successful! Broker is reachable.
-                            </p>
-                        </div>
-                    )}
-
+                <div className="p-8 space-y-6 overflow-y-auto flex-1 min-h-0">
                     {/* Name */}
                     <div>
                         <label className="block text-sm font-medium text-slate-300 mb-1.5">
@@ -211,31 +171,58 @@ export function AddClusterModal({ onClose, onAdd, isLoading }: AddClusterModalPr
                     )}
                 </div>
 
-                {/* Footer */}
-                <div className="px-8 py-5 border-t border-slate-800 bg-slate-800/20 flex justify-between items-center">
-                    <button
-                        onClick={onClose}
-                        className="text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <div className="flex gap-3">
+                {/* Test Result + Footer (always visible, outside the scroll area) */}
+                <div className="border-t border-slate-800 bg-slate-800/20 shrink-0">
+                    {/* Success Banner */}
+                    {testStatus === 'success' && (
+                        <div className="mx-8 mt-4 bg-emerald-500/10 border border-emerald-500/50 rounded-lg px-4 py-3 flex items-center gap-3">
+                            <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+                            <p className="text-emerald-300 text-sm font-medium">
+                                Connection successful! Broker is reachable.
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Error Banner */}
+                    {testStatus === 'error' && testError && (
+                        <div className="mx-8 mt-4 bg-red-500/10 border border-red-500 rounded-lg px-4 py-3 flex items-start gap-3">
+                            <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            <div className="space-y-1 min-w-0">
+                                <h3 className="text-red-400 font-semibold text-sm">Connection Failed</h3>
+                                <p className="text-red-300/80 text-sm break-words">{testError}</p>
+                                <p className="text-xs text-slate-400">
+                                    Check network connectivity, verify broker address and port, and ensure
+                                    security protocols match.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="px-8 py-5 flex justify-between items-center">
                         <button
-                            onClick={handleTestConnection}
-                            disabled={!brokers.trim() || testStatus === 'testing'}
-                            className="text-primary hover:text-blue-400 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors border border-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            onClick={onClose}
+                            className="text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 transition-colors"
                         >
-                            {testStatus === 'testing' && <Loader2 className="w-4 h-4 animate-spin" />}
-                            Test Connection
+                            Cancel
                         </button>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={!name.trim() || !brokers.trim() || isLoading}
-                            className="bg-primary hover:bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-lg shadow-lg shadow-blue-900/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                            Add Cluster
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleTestConnection}
+                                disabled={!brokers.trim() || testStatus === 'testing'}
+                                className="text-primary hover:text-blue-400 text-sm font-semibold px-4 py-2 rounded-lg hover:bg-primary/10 transition-colors border border-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {testStatus === 'testing' && <Loader2 className="w-4 h-4 animate-spin" />}
+                                Test Connection
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={!name.trim() || !brokers.trim() || isLoading}
+                                className="bg-primary hover:bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-lg shadow-lg shadow-blue-900/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                Add Cluster
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

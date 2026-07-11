@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     ArrowLeft,
@@ -9,9 +9,15 @@ import {
     Layers,
     ChevronRight,
     Send,
+    Search,
+    X,
+    SearchX,
+    ArrowDownWideNarrow,
+    ArrowUpNarrowWide,
 } from 'lucide-react';
 import { KafkaConnection, TopicInfo, KafkaMessage } from '../types';
 import { formatJson, isJsonString, formatTimestamp } from '../lib/utils';
+import { compileQuery, matchesQuery } from '../lib/query';
 import { ProduceMessageModal } from './ProduceMessageModal';
 
 interface TopicDetailProps {
@@ -29,6 +35,8 @@ export function TopicDetail({ connection, topicName, topicInfo, onBack }: TopicD
     const [liveMessages, setLiveMessages] = useState<KafkaMessage[]>([]);
     const [expandedMessage, setExpandedMessage] = useState<number | null>(null);
     const [isProduceOpen, setIsProduceOpen] = useState(false);
+    const [queryText, setQueryText] = useState('');
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -43,10 +51,31 @@ export function TopicDetail({ connection, topicName, topicInfo, onBack }: TopicD
         enabled: connection.status === 'connected',
     });
 
-    // All messages = initial + live (capped at MAX_MESSAGES)
-    const allMessages = isLiveMode
-        ? [...initialMessages, ...liveMessages].slice(-MAX_MESSAGES)
-        : initialMessages;
+    // Live mode shows only messages received after it started (liveMessages
+    // is already capped at MAX_MESSAGES); normal mode shows the fetched history
+    const allMessages = isLiveMode ? liveMessages : initialMessages;
+
+    // Field query / freetext filter
+    const compiledQuery = useMemo(() => compileQuery(queryText), [queryText]);
+    const queryError = compiledQuery.type === 'error' ? compiledQuery.message : null;
+    const filteredMessages = useMemo(
+        () =>
+            compiledQuery.type === 'empty'
+                ? allMessages
+                : allMessages.filter((msg) => matchesQuery(compiledQuery, msg.value, msg.key)),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [compiledQuery, initialMessages, liveMessages, isLiveMode]
+    );
+
+    // Sort by timestamp (offset as tie-breaker), newest first by default
+    const sortedMessages = useMemo(() => {
+        const sorted = [...filteredMessages].sort((a, b) => {
+            const diff = parseInt(a.timestamp) - parseInt(b.timestamp);
+            if (diff !== 0 && !isNaN(diff)) return diff;
+            return Number(a.offset) - Number(b.offset);
+        });
+        return sortOrder === 'newest' ? sorted.reverse() : sorted;
+    }, [filteredMessages, sortOrder]);
 
     // Live tail subscription
     useEffect(() => {
@@ -91,12 +120,15 @@ export function TopicDetail({ connection, topicName, topicInfo, onBack }: TopicD
         };
     }, []);
 
-    // Auto-scroll to bottom in live mode
+    // Auto-scroll to the newest message in live mode
     useEffect(() => {
-        if (isLiveMode && messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        if (!isLiveMode) return;
+        if (sortOrder === 'newest') {
+            messagesContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [liveMessages, isLiveMode]);
+    }, [liveMessages, isLiveMode, sortOrder]);
 
     const toggleLiveMode = useCallback(() => {
         if (isLiveMode) {
@@ -114,7 +146,7 @@ export function TopicDetail({ connection, topicName, topicInfo, onBack }: TopicD
     }, []);
 
     return (
-        <div className="flex-1 flex flex-col min-w-0 bg-[#101722]">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#101722]">
             {/* Header */}
             <header className="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-[#101722]/80 backdrop-blur sticky top-0 z-20">
                 <div className="flex items-center gap-3 text-sm">
@@ -197,6 +229,66 @@ export function TopicDetail({ connection, topicName, topicInfo, onBack }: TopicD
                 </div>
             )}
 
+            {/* Query / Filter Bar */}
+            <div className="px-6 py-3 border-b border-slate-800 bg-[#0d1420]">
+                <div className="flex items-center gap-3">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                        <input
+                            type="text"
+                            value={queryText}
+                            onChange={(e) => setQueryText(e.target.value)}
+                            placeholder='Filter messages — e.g. phoneNumber is not null, profile.age > 25, languages contains "Python", or free text'
+                            spellCheck={false}
+                            className={`w-full bg-slate-900/70 border rounded-lg pl-9 pr-9 py-2 text-sm font-mono text-slate-200 placeholder:text-slate-600 placeholder:font-sans focus:outline-none transition-colors ${
+                                queryError
+                                    ? 'border-red-500/50 focus:border-red-500'
+                                    : 'border-slate-700/60 focus:border-primary/60'
+                            }`}
+                        />
+                        {queryText && (
+                            <button
+                                onClick={() => setQueryText('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-slate-500 hover:text-white rounded transition-colors"
+                                title="Clear filter"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Sort Order Toggle */}
+                    <button
+                        onClick={() =>
+                            setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')
+                        }
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-900/70 border border-slate-700/60 hover:border-slate-600 hover:text-white transition-colors whitespace-nowrap"
+                        title="Toggle sort order"
+                    >
+                        {sortOrder === 'newest' ? (
+                            <>
+                                <ArrowDownWideNarrow className="w-4 h-4" />
+                                Newest first
+                            </>
+                        ) : (
+                            <>
+                                <ArrowUpNarrowWide className="w-4 h-4" />
+                                Oldest first
+                            </>
+                        )}
+                    </button>
+                </div>
+                {queryError && (
+                    <p className="mt-1.5 text-xs text-red-400 font-mono">{queryError}</p>
+                )}
+                {queryText && !queryError && (
+                    <p className="mt-1.5 text-xs text-slate-500">
+                        {filteredMessages.length} of {allMessages.length} message
+                        {allMessages.length !== 1 ? 's' : ''} match
+                    </p>
+                )}
+            </div>
+
             {/* Messages */}
             <div
                 ref={messagesContainerRef}
@@ -222,15 +314,32 @@ export function TopicDetail({ connection, topicName, topicInfo, onBack }: TopicD
                     </div>
                 )}
 
+                {/* No matches for the active filter */}
+                {!messagesLoading && allMessages.length > 0 && filteredMessages.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 gap-3">
+                        <SearchX className="w-10 h-10 text-slate-600" />
+                        <p className="text-slate-400 text-sm">
+                            No messages match your filter.
+                        </p>
+                        <button
+                            onClick={() => setQueryText('')}
+                            className="text-xs text-primary hover:underline"
+                        >
+                            Clear filter
+                        </button>
+                    </div>
+                )}
+
                 {/* Message Cards */}
-                {allMessages.map((msg, idx) => (
+                {sortedMessages.map((msg, idx) => (
                     <MessageCard
-                        key={`${msg.partition}-${msg.offset}-${idx}`}
+                        key={`${msg.partition}-${msg.offset}`}
                         message={msg}
                         isExpanded={expandedMessage === idx}
                         onToggle={() => setExpandedMessage(expandedMessage === idx ? null : idx)}
                         onCopy={() => copyMessage(msg.value)}
                         colorIndex={msg.partition}
+                        entryDelay={isLiveMode ? 0 : Math.min(idx * 25, 300)}
                     />
                 ))}
 
@@ -273,12 +382,14 @@ function MessageCard({
     onToggle,
     onCopy,
     colorIndex,
+    entryDelay = 0,
 }: {
     message: KafkaMessage;
     isExpanded: boolean;
     onToggle: () => void;
     onCopy: () => void;
     colorIndex: number;
+    entryDelay?: number;
 }) {
     const isJson = isJsonString(message.value);
     const displayValue = isJson ? formatJson(message.value) : message.value || '';
@@ -286,7 +397,8 @@ function MessageCard({
 
     return (
         <div
-            className="bg-[#1e293b] border border-slate-700/50 rounded-xl overflow-hidden shadow-sm relative group cursor-pointer transition-all hover:border-slate-600/50"
+            className="animate-message-in bg-[#1e293b] border border-slate-700/50 rounded-xl overflow-hidden shadow-sm relative group cursor-pointer transition-all hover:border-slate-600/50"
+            style={{ animationDelay: `${entryDelay}ms` }}
             onClick={onToggle}
         >
             {/* Colored partition indicator bar */}

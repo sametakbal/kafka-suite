@@ -56,7 +56,7 @@ export function Dashboard({ connection, onDisconnect }: DashboardProps) {
     }
 
     return (
-        <div className="flex-1 flex flex-col min-w-0 bg-[#101722]">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-[#101722]">
             {/* Header */}
             <header className="h-16 border-b border-slate-800 flex items-center justify-between px-6 bg-[#101722]/80 backdrop-blur sticky top-0 z-20">
                 <div className="flex items-center gap-3 text-sm">

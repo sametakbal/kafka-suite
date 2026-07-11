@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Sidebar } from './components/Sidebar';
+import { Sidebar, ActiveView } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
+import { Overview } from './components/Overview';
 import { AddClusterModal } from './components/AddClusterModal';
 import { KafkaConnection, TopicInfo } from './types';
 
 export default function App() {
     const queryClient = useQueryClient();
     const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+    const [activeView, setActiveView] = useState<ActiveView>('clusters');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     // Fetch saved connections
@@ -66,6 +68,7 @@ export default function App() {
     const handleSelectConnection = useCallback(
         async (id: string) => {
             setSelectedConnectionId(id);
+            setActiveView('clusters');
             const conn = connections.find((c) => c.id === id);
             if (conn && conn.status !== 'connected') {
                 connectMutation.mutate(id);
@@ -80,6 +83,8 @@ export default function App() {
             <Sidebar
                 connections={connections}
                 selectedConnectionId={selectedConnectionId}
+                activeView={activeView}
+                onNavigate={setActiveView}
                 onSelectConnection={handleSelectConnection}
                 onAddCluster={() => setIsAddModalOpen(true)}
                 onDeleteConnection={(id) => deleteConnectionMutation.mutate(id)}
@@ -87,8 +92,14 @@ export default function App() {
             />
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0">
-                {selectedConnection ? (
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+                {activeView === 'overview' ? (
+                    <Overview
+                        connections={connections}
+                        onOpenCluster={handleSelectConnection}
+                        onAddCluster={() => setIsAddModalOpen(true)}
+                    />
+                ) : selectedConnection ? (
                     <Dashboard
                         connection={selectedConnection}
                         onDisconnect={() => {

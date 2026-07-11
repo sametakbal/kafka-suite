@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-    Monitor,
     Database,
     Layers,
     Users,
@@ -9,10 +8,15 @@ import {
     Unplug,
 } from 'lucide-react';
 import { KafkaConnection } from '../types';
+import logo from '../assets/kafka-suite-logo.png';
+
+export type ActiveView = 'overview' | 'clusters';
 
 interface SidebarProps {
     connections: KafkaConnection[];
     selectedConnectionId: string | null;
+    activeView: ActiveView;
+    onNavigate: (view: ActiveView) => void;
     onSelectConnection: (id: string) => void;
     onAddCluster: () => void;
     onDeleteConnection: (id: string) => void;
@@ -22,6 +26,8 @@ interface SidebarProps {
 export function Sidebar({
     connections,
     selectedConnectionId,
+    activeView,
+    onNavigate,
     onSelectConnection,
     onAddCluster,
     onDeleteConnection,
@@ -31,9 +37,11 @@ export function Sidebar({
         <div className="w-64 h-full bg-[#0f172a] border-r border-slate-800 flex flex-col shrink-0">
             {/* Brand Header */}
             <div className="p-6 flex items-center gap-3">
-                <div className="bg-primary/20 p-2 rounded-lg text-primary">
-                    <Monitor className="w-5 h-5" />
-                </div>
+                <img
+                    src={logo}
+                    alt="Kafka Suite"
+                    className="w-9 h-9 rounded-lg shrink-0 border border-slate-700/50"
+                />
                 <div className="flex flex-col">
                     <h1 className="text-base font-bold text-white tracking-wide">Kafka Suite</h1>
                     <p className="text-xs text-slate-400">v1.0.0</p>
@@ -48,8 +56,18 @@ export function Sidebar({
                         Platform
                     </p>
                     <ul className="space-y-1">
-                        <NavItem icon={<Layers className="w-5 h-5" />} label="Overview" active={false} />
-                        <NavItem icon={<Database className="w-5 h-5" />} label="Clusters" active={true} />
+                        <NavItem
+                            icon={<Layers className="w-5 h-5" />}
+                            label="Overview"
+                            active={activeView === 'overview'}
+                            onClick={() => onNavigate('overview')}
+                        />
+                        <NavItem
+                            icon={<Database className="w-5 h-5" />}
+                            label="Clusters"
+                            active={activeView === 'clusters'}
+                            onClick={() => onNavigate('clusters')}
+                        />
                     </ul>
                 </div>
 
@@ -132,23 +150,26 @@ function NavItem({
     icon,
     label,
     active,
+    onClick,
 }: {
     icon: React.ReactNode;
     label: string;
     active: boolean;
+    onClick: () => void;
 }) {
     return (
         <li>
-            <a
-                href="#"
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${active
+            <button
+                type="button"
+                onClick={onClick}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${active
                     ? 'bg-primary/10 text-primary'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                     }`}
             >
                 {icon}
                 <span className="text-sm font-medium">{label}</span>
-            </a>
+            </button>
         </li>
     );
 }
