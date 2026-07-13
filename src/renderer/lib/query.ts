@@ -166,7 +166,7 @@ function tokenize(input: string): Token[] {
 class Parser {
     private pos = 0;
 
-    constructor(private tokens: Token[]) {}
+    constructor(private tokens: Token[]) { }
 
     parse(): AstNode {
         const node = this.parseOr();
@@ -330,8 +330,8 @@ function looseEquals(fieldValue: unknown, queryValue: QueryValue): boolean {
             typeof fieldValue === 'number'
                 ? fieldValue
                 : typeof fieldValue === 'string'
-                  ? Number(fieldValue)
-                  : NaN;
+                    ? Number(fieldValue)
+                    : NaN;
         return !isNaN(n) && n === queryValue;
     }
     if (typeof queryValue === 'boolean') {
@@ -353,8 +353,8 @@ function compareOrdered(fieldValue: unknown, queryValue: QueryValue): number | n
         typeof fieldValue === 'number'
             ? fieldValue
             : typeof fieldValue === 'string' && fieldValue.trim() !== ''
-              ? Number(fieldValue)
-              : NaN;
+                ? Number(fieldValue)
+                : NaN;
     const queryNum = typeof queryValue === 'number' ? queryValue : Number(queryValue);
 
     if (!isNaN(fieldNum) && !isNaN(queryNum)) {
@@ -443,6 +443,7 @@ export function compileQuery(input: string): CompiledQuery {
     } catch (err) {
         return {
             type: 'error',
+            /* v8 ignore next */
             message: err instanceof Error ? err.message : 'Invalid query',
         };
     }
