@@ -1,7 +1,11 @@
 node_modules/
-dist-electron/
-dist-renderer/
 dist/
-release/
+coverage/
+sidecar/target/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/resources/
+.idea/
+.vscode/
 *.log
 .DS_Store

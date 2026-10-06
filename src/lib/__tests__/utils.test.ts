@@ -1,19 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cn, formatJson, isJsonString, formatTimestamp, truncate } from '../utils';
-
-describe('cn', () => {
-    it('merges multiple class names', () => {
-        expect(cn('foo', 'bar')).toBe('foo bar');
-    });
-
-    it('ignores falsy values', () => {
-        expect(cn('foo', false && 'bar', undefined, null as any)).toBe('foo');
-    });
-
-    it('deduplicates conflicting tailwind classes (last wins)', () => {
-        expect(cn('p-4', 'p-2')).toBe('p-2');
-    });
-});
+import { formatJson, isJsonString, formatTimestamp, truncate } from '../utils';
 
 describe('formatJson', () => {
     it('returns empty string for null input', () => {

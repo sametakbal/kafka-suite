@@ -1,206 +1,120 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Kafka-Suite-4287f5?style=for-the-badge&logo=apachekafka&logoColor=white" alt="Kafka Suite" />
-</p>
+# Kafka Suite
 
-<h1 align="center">Kafka Suite</h1>
+A desktop app for working with Apache Kafka clusters. You can list a cluster's topics, read the latest messages or tail new ones live, filter them with a small query language, inspect values and headers, create topics and produce test messages.
 
-<p align="center">
-  A modern, open-source desktop application for managing and monitoring Apache Kafka clusters.<br/>
-  Built with Electron, React, and TypeScript.
-</p>
+![Reading user.events with a JSON message open](docs/screenshots/messages.png)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/electron-40-47848F?style=flat-square&logo=electron&logoColor=white" />
-  <img src="https://img.shields.io/badge/react-19-61DAFB?style=flat-square&logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/typescript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/tailwindcss-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" />
-</p>
+## Features
 
----
+- **Clusters:** Organise them in folders and tag each one as DEV, TEST or PROD with a colour. Selecting a cluster connects it. Connections can be exported to JSON and imported on another machine; passwords are never included in exports.
+- **Security:** PLAINTEXT, SSL, SASL_PLAINTEXT and SASL_SSL with SASL PLAIN, SCRAM-SHA-256 or SCRAM-SHA-512. TLS takes a truststore and an optional client keystore (JKS, PKCS#12 or PEM); host name verification can be turned off for test clusters.
+- **Passwords in the OS keychain:** Windows Credential Manager, macOS Keychain or Secret Service on Linux, under the service name `kafka-suite`.
+- **Overview and topics:** Connected clusters with their real broker counts. Each cluster lists its topics with partitions, replication factor and retained message count, a search (`orders.*` works) and an option to hide internal topics.
+- **Latest messages:** Opening a topic reads its newest messages across all partitions (50 by default). Partitions are assigned directly, so no consumer group is created and nothing is committed.
+- **Live tail:** Shows new messages as they arrive, newest first, keeping the last 100 (configurable).
+- **Query language:** Filter on JSON values, e.g. `profile.age > 25 and username = "johndoe"`, `languages contains "Python"`, `roles[0].roleName = Admin`, `phoneNumber is not null`, `not (isActive = true)`. Text without operators searches keys and values.
+- **Message details:** The value can be shown as Text, JSON, XML or Hex, with a tab each for the key and the headers. Each partition gets its own colour.
+- **Control characters:** Optionally shows CR, LF, TAB and ASCII controls such as SOH, STX and NUL as visible markers.
+- **Produce:** A syntax-highlighted editor with JSON/XML formatting and loading a value from a file (binary too). You can set the key, the partition and headers, and send several copies. The dialog stays open, so you can send again.
+- **Drafts:** Saved sample messages that remember their topic and cluster. Send one in a single click from the sidebar; PROD clusters ask first.
+- **Create topic:** Partitions, replication factor and topic configs, with the common ones (`retention.ms`, `cleanup.policy`, …) one click away.
+- **Error screens:** Show what failed (timeout, SASL, TLS, authorization…), its likely causes and a countdown to an automatic retry.
+- Dark, light or system theme; `Ctrl+K` to search topics, clusters, drafts and message keys.
 
-## ✨ Features
+## Screenshots
 
-- **Multi-Cluster Management** — Connect to and manage multiple Kafka clusters simultaneously
-- **Topic Explorer** — Browse topics with partition count, replication factor, and message count at a glance
-- **Real-time Message Streaming** — Live tail consumer with auto-scroll and partition color indicators
-- **Message Producer** — Produce messages to topics with key, headers, and partition selection
-- **Topic Creation** — Create topics with custom partition count, replication factor, and advanced configs
-- **Message Viewer** — Inspect messages with JSON syntax highlighting and pretty-print
-- **Connection Testing** — Test broker connectivity before saving with detailed error feedback
-- **Secure Storage** — Connection credentials stored locally with encryption via electron-store
-- **Dark Theme** — Clean, modern dark UI designed for extended use
-
-## 📸 Screenshots
-
-<!-- Add your screenshots here -->
-<!-- ![Dashboard](screenshots/dashboard.png) -->
-<!-- ![Topic Detail](screenshots/topic-detail.png) -->
-<!-- ![Live Tail](screenshots/live-tail.png) -->
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) v18 or later
-- npm v9 or later
-- A running Apache Kafka cluster to connect to
-
-### Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/kafka-suite.git
-cd kafka-suite
-
-# Install dependencies
-npm install
-```
-
-### Development
-
-```bash
-# Start both renderer (Vite) and main process in watch mode
-npm run dev
-
-# In a separate terminal, start Electron
-npm start
-```
-
-Or use the all-in-one dev command:
-
-```bash
-npm run electron:dev
-```
-
-### Build
-
-```bash
-# Build renderer and main process for production
-npm run build
-
-# Run the production build
-npm start
-```
-
-### Package for Windows
-
-```bash
-# Create NSIS installer + portable executable
-npm run dist
-
-# Create portable executable only
-npm run dist:portable
-```
-
-Output files will be in the `release/` directory.
-
-## 🏗️ Tech Stack
-
-| Layer | Technology |
+| | |
 |---|---|
-| Framework | [Electron 40](https://www.electronjs.org/) |
-| Frontend | [React 19](https://react.dev/) + [TypeScript 5](https://www.typescriptlang.org/) |
-| Styling | [Tailwind CSS 4](https://tailwindcss.com/) |
-| Bundler | [Vite 7](https://vite.dev/) |
-| Kafka Client | [KafkaJS](https://kafka.js.org/) |
-| State Management | [TanStack Query 5](https://tanstack.com/query) |
-| Local Storage | [electron-store](https://github.com/sindresorhus/electron-store) |
-| Icons | [Lucide React](https://lucide.dev/) |
-| Packaging | [electron-builder](https://www.electron.build/) |
+| ![Topic list with cluster stats](docs/screenshots/topics.png) | ![Live tail](docs/screenshots/live-tail.png) |
+| **Topics**: partitions, replication, retained messages, broker info | **Live tail**: new messages as they arrive, no consumer group |
+| ![Query filter](docs/screenshots/query.png) | ![Produce message](docs/screenshots/produce.png) |
+| **Query**: `profile.age > 30 and languages contains "Go"` | **Produce**: value editor, key, partition, headers, drafts |
+| ![Overview of clusters](docs/screenshots/overview.png) | ![Light theme with an XML value](docs/screenshots/light-xml.png) |
+| **Overview**: every cluster at a glance | **Light theme**: XML value with highlighting |
+| ![Connection settings](docs/screenshots/connection.png) | ![Cluster not reachable](docs/screenshots/error.png) |
+| **Connection**: SASL, TLS stores, keychain | **Errors**: likely causes, automatic retry |
 
-## 📁 Project Structure
+## Installation
 
-```
-kafka-suite/
-├── src/
-│   ├── main/                  # Electron main process
-│   │   ├── index.ts           # Window creation & app lifecycle
-│   │   ├── preload.ts         # Context bridge (IPC API)
-│   │   ├── kafka.ts           # KafkaJS integration & IPC handlers
-│   │   └── store.ts           # Encrypted local storage for connections
-│   └── renderer/              # React frontend
-│       ├── main.tsx           # React entry point
-│       ├── App.tsx            # Root component & connection state
-│       ├── types.ts           # Shared TypeScript interfaces
-│       ├── lib/utils.ts       # Utility functions
-│       └── components/
-│           ├── Sidebar.tsx            # Cluster list & navigation
-│           ├── Dashboard.tsx          # Topic explorer & stats
-│           ├── TopicDetail.tsx        # Message viewer & live tail
-│           ├── AddClusterModal.tsx    # Connection form with test
-│           ├── CreateTopicModal.tsx   # Topic creation form
-│           └── ProduceMessageModal.tsx # Message producer
-├── design/                    # HTML design mockups
-├── tsconfig.json              # Renderer TypeScript config
-├── tsconfig.main.json         # Main process TypeScript config
-├── vite.config.ts             # Vite configuration
-└── package.json               # Dependencies & build config
-```
+Download the installer for your platform from [Releases](../../releases):
 
-## ⚙️ How It Works
+| Platform | Package |
+|----------|---------|
+| Windows | `.msi` or `-setup.exe` |
+| Linux | `.deb`, `.rpm`, `.AppImage` |
+| macOS | `.dmg` |
 
-Kafka Suite uses Electron's **context isolation** pattern for security:
+The Apache Kafka client and a Java runtime are bundled, so there is nothing else to install.
 
-1. **Main Process** (`src/main/`) — Runs Node.js with full system access. Manages Kafka connections via KafkaJS, handles encrypted storage, and exposes functionality through IPC handlers.
+Connections saved by Kafka Suite 1.x (the Electron version) are imported the first time 2.x starts; their passwords move to the OS keychain.
 
-2. **Preload Script** (`src/main/preload.ts`) — Bridges main and renderer using `contextBridge.exposeInMainWorld()`. Only whitelisted APIs are exposed.
-
-3. **Renderer Process** (`src/renderer/`) — A sandboxed React app that communicates with Kafka exclusively through the preload bridge. No direct access to Node.js APIs.
+## Architecture
 
 ```
-┌─────────────┐     IPC Bridge      ┌──────────────┐     KafkaJS     ┌─────────────┐
-│   React UI  │ ◄──────────────────► │ Main Process │ ◄─────────────► │   Kafka     │
-│  (Renderer) │   contextBridge     │  (Node.js)   │                │  Brokers    │
-└─────────────┘                      └──────────────┘                └─────────────┘
-                                           │
-                                     electron-store
-                                     (encrypted)
+┌──────────────── Tauri (Rust) ─────────────────┐   line-delimited JSON   ┌──── Java 21 sidecar ─────┐
+│ React UI (src/)                               │   over stdin/stdout     │ Apache Kafka client      │
+│ keychain, ~/.kafka-suite/*.json, file dialogs │ ◄─────────────────────► │ admin, consumer (assign) │
+│ live-tail events → webview                    │                         │ producer, live tail      │
+└───────────────────────────────────────────────┘                         └──────────────────────────┘
 ```
 
-## 🔧 Supported Connection Types
+| Folder | What lives there |
+|--------|------------------|
+| `src/` | The UI: React, TypeScript and zustand. `src/lib/query.ts` is the message query language |
+| `src-tauri/` | Desktop shell. Starts and supervises the sidecar, forwards live-tail events, fills saved secrets in from the keychain, reads/writes the local JSON files and imports 1.x connections |
+| `sidecar/` | Kafka operations (`KafkaOps`), live tail (`LiveTail`), client settings (`Config`), one admin client and producer per cluster (`ClientPool`) |
 
-- **Plaintext** — Direct broker connection without encryption
-- **SSL** — TLS-encrypted connections
-- **SASL/Plain** — Username/password authentication
-- **SASL/SCRAM-SHA-256** — SCRAM authentication
-- **SASL/SCRAM-SHA-512** — SCRAM authentication
+There is no server; everything runs on your machine.
 
-## 🤝 Contributing
+## Local data
 
-Contributions are welcome! Here's how you can help:
+| Location | Contents |
+|----------|----------|
+| `~/.kafka-suite/connections.json` | Connections, without secrets |
+| `~/.kafka-suite/settings.json` | Theme, messages to read, live buffer, control-character display |
+| `~/.kafka-suite/templates.json` | Drafts |
+| `~/.kafka-suite/logs/sidecar.log` | Kafka client warnings and errors |
+| OS keychain, service `kafka-suite` | Passwords under `<id>`, `<id>:truststore` and `<id>:keystore` |
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+## Development
 
-### Development Tips
+Requirements: Node 22+, Rust (stable) and JDK 21+. Maven is not needed; use `sidecar/mvnw`.
 
-- Run `npm run dev` to start Vite dev server with hot reload for the renderer
-- Run `npm run dev:main` in a separate terminal for main process watch mode
-- After changing main process code, restart Electron with `npm start`
-- Use `npm run build` to verify production builds before submitting PRs
+```bash
+npm install
+npm run sidecar      # builds the sidecar jar and a jlink runtime into src-tauri/resources/
+npm run tauri dev    # starts the app in development mode
+```
 
-## 📋 Roadmap
+For UI-only work, `npm run dev` opens the app in a browser with a mock backend.
 
-- [ ] Consumer group management & monitoring
-- [ ] Schema Registry integration (Avro, Protobuf, JSON Schema)
-- [ ] Message deserialization plugins
-- [ ] Broker & partition metrics dashboard
-- [ ] Export/import connection profiles
-- [ ] macOS and Linux packaging
-- [ ] Custom themes
-- [ ] ACL management
-- [ ] Multi-language support
+Tests:
 
-## 📄 License
+```bash
+npm test                      # query language and helpers (100% coverage required: npm run test:coverage)
+npm run typecheck
+cd sidecar && ./mvnw test     # Java unit tests
+cd src-tauri && cargo test    # Rust unit tests
+```
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+A local Kafka for testing:
 
----
+```bash
+docker run -d --name kafka-suite-dev -p 9092:9092 apache/kafka:latest
+```
 
-<p align="center">
-  Built with ☕ and ❤️ for the Kafka community
-</p>
+Connect to `localhost:9092` with PLAINTEXT.
+
+> On Windows, `cargo build` fails while Smart App Control is turned on, because it blocks the unsigned DLLs that Rust builds for its compile-time macros.
+
+## Packaging
+
+```bash
+npm run tauri build
+```
+
+On Windows this produces MSI and NSIS installers under `src-tauri/target/release/bundle/`. Pushing a `v*` tag runs `.github/workflows/release.yml`, which runs the tests, builds the Windows, Linux and macOS packages and attaches them to a GitHub release.
+
+## License
+
+MIT
