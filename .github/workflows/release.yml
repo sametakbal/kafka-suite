@@ -1,9 +1,9 @@
-name: Build & Release
+name: Release
 
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 permissions:
   contents: write
@@ -11,12 +11,12 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
-          - os: macos-latest
-            platform: mac
           - os: windows-latest
-            platform: win
+          - os: ubuntu-22.04
+          - os: macos-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -24,51 +24,67 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
+          node-version: 22
+          cache: npm
 
-      - name: Install dependencies
+      # The sidecar jar is built and a trimmed runtime is made with jlink from this JDK.
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: sidecar/pom.xml
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libdbus-1-dev libfuse2
+
+      - name: Install npm packages
         run: npm ci
 
-      - name: Build & Package (macOS)
-        if: matrix.platform == 'mac'
-        run: npm run dist:mac
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Run tests
+        run: npm test
 
-      - name: Build & Package (Windows)
-        if: matrix.platform == 'win'
-        run: npm run dist:win
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      # The UI shows package.json's version, the installers tauri.conf.json's: keep both on the tag.
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          node -e "
+            const fs = require('fs');
+            for (const f of ['src-tauri/tauri.conf.json', 'package.json']) {
+              const doc = JSON.parse(fs.readFileSync(f, 'utf8'));
+              doc.version = '$VERSION';
+              fs.writeFileSync(f, JSON.stringify(doc, null, 2) + '\n');
+            }
+          "
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-${{ matrix.platform }}
-          path: |
-            release/*.exe
-            release/*.dmg
-            release/*.zip
-          if-no-files-found: ignore
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/**/*
-          generate_release_notes: true
+      # beforeBuildCommand runs `npm run sidecar` (mvnw package + jlink) before bundling.
+      - name: Build and publish
+        uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        with:
+          args: ${{ runner.os == 'Linux' && '--bundles deb,rpm,appimage' || '' }}
+          tagName: ${{ github.ref_name }}
+          releaseName: Kafka Suite ${{ github.ref_name }}
+          releaseBody: |
+            Installers for Windows (MSI / NSIS), Linux (DEB / RPM / AppImage) and macOS (DMG).
+            The Apache Kafka client and a Java runtime are bundled — nothing else to install.
+          releaseDraft: false
+          prerelease: false
