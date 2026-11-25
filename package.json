@@ -15,7 +15,11 @@
     "dist": "npm run build && electron-builder --win",
     "dist:portable": "npm run build && electron-builder --win portable",
     "dist:win": "npm run build && electron-builder --win --publish never",
-    "dist:mac": "npm run build && electron-builder --mac --publish never"
+    "dist:mac": "npm run build && electron-builder --mac --publish never",
+    "test:e2e": "tsc -p tsconfig.main.json && node e2e/run.js",
+    "test:e2e:offline": "tsc -p tsconfig.main.json && node e2e/run.js --offline",
+    "kafka:up": "docker compose -f e2e/docker-compose.yml up -d",
+    "kafka:down": "docker compose -f e2e/docker-compose.yml down"
   },
   "keywords": [
     "kafka",
