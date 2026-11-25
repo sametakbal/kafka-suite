@@ -115,6 +115,10 @@ const CATALOG: Record<string, Explained> = {
     desc: "The record is larger than the topic or broker allows.",
     causes: ["Raise max.message.bytes on the topic", "Send a smaller value"],
   },
+  PARTITION_NOT_FOUND: {
+    icon: "ph-rows", title: "Partition not found", edit: "connection", desc: "",
+    causes: ["Leave the partition empty to let Kafka choose one", "The topic has fewer partitions than the number entered"],
+  },
   NOT_CONNECTED: {
     icon: "ph-plugs", title: "Not connected", edit: "connection",
     desc: "This cluster is not connected. Connect it from the sidebar and try again.", causes: [],

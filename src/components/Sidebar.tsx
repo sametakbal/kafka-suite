@@ -6,6 +6,7 @@ import { exportConnectionsToFile, importConnectionsFromFile } from "../lib/trans
 import type { Connection, TopicInfo } from "../lib/types";
 import { Icon, StatusDot } from "./ui";
 import Drafts from "./Drafts";
+import { isSecured } from "../lib/protocol";
 
 const TREE_TOPICS = 6;
 
@@ -136,7 +137,7 @@ function ConnectionNode({ conn }: { conn: Connection }) {
             )}
           </span>
         ) : (
-          conn.securityProtocol !== "PLAINTEXT" && <Icon name="ph-lock-simple" size={13} color="var(--muted)" />
+          isSecured(conn.securityProtocol) && <Icon name="ph-lock-simple" size={13} color="var(--muted)" />
         )}
       </div>
       {st?.state === "error" && st.error && (

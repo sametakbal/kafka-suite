@@ -2,6 +2,7 @@ import { activeTabOf, connOf, useApp } from "../state";
 import { clock, n } from "../lib/format";
 import { short } from "../lib/errors";
 import { Icon } from "./ui";
+import { isSecured, protocolLabel } from "../lib/protocol";
 
 export default function StatusBar() {
   const tab = useApp(activeTabOf);
@@ -17,7 +18,7 @@ export default function StatusBar() {
 
   if (conn) {
     items.push({ icon: "ph-hard-drives", t: conn.bootstrap });
-    items.push({ icon: conn.securityProtocol === "PLAINTEXT" ? "ph-lock-simple-open" : "ph-lock-simple", t: conn.securityProtocol.startsWith("SASL") ? `${conn.securityProtocol} · ${conn.saslMechanism}` : conn.securityProtocol });
+    items.push({ icon: isSecured(conn.securityProtocol) ? "ph-lock-simple" : "ph-lock-simple-open", t: protocolLabel(conn.securityProtocol, conn.saslMechanism) });
     if (st?.info) items.push({ icon: "ph-fingerprint", t: st.info.clusterId });
     switch (st?.state) {
       case "connected":

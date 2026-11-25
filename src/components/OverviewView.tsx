@@ -3,6 +3,7 @@ import { ENV_COLOR, SWATCHES, n } from "../lib/format";
 import { short } from "../lib/errors";
 import type { Connection } from "../lib/types";
 import { EnvBadge, Icon, StatusDot } from "./ui";
+import { protocolLabel } from "../lib/protocol";
 
 /** Shown when no tab is open: every saved cluster at a glance (the "Overview" of Kafka Suite 1.x). */
 export default function OverviewView() {
@@ -71,7 +72,7 @@ function ClusterCard({ conn }: { conn: Connection }) {
       <div className="mono ellipsis" style={{ fontSize: 11.5, color: "var(--muted)" }} title={conn.bootstrap}>{servers.join(", ")}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
         <span className="chip" style={{ color: st?.state === "error" ? "var(--err)" : st?.state === "connected" ? "var(--ok)" : undefined }}>{stateText}</span>
-        <span className="chip">{conn.securityProtocol}</span>
+        <span className="chip">{protocolLabel(conn.securityProtocol)}</span>
         {st?.info && <span className="chip">{st.info.brokers.length} broker{st.info.brokers.length === 1 ? "" : "s"}</span>}
         {st?.topics && <span className="chip">{st.topics.filter((t) => !t.internal).length} topics</span>}
         {!st?.info && <span className="chip">{servers.length} bootstrap server{servers.length === 1 ? "" : "s"}</span>}

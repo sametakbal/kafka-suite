@@ -30,6 +30,16 @@ class ConfigTest {
     }
 
     @Test
+    void noneSendsNoSecurityProtocol() {
+        Config.Ssl ssl = new Config.Ssl("/certs/trust.jks", "pw", null, null, true);
+        Properties p = conn("NONE", "PLAIN", ssl).common("cid");
+        assertFalse(p.containsKey("security.protocol"));
+        assertFalse(p.containsKey("sasl.jaas.config"));
+        assertFalse(p.containsKey("ssl.truststore.location"));
+        assertEquals("broker1:9092,broker2:9092", p.get("bootstrap.servers"));
+    }
+
+    @Test
     void scramUsesTheScramLoginModuleAndEscapesQuotes() {
         Properties p = conn("SASL_SSL", "scram-sha-512", null).common("cid");
         assertEquals("SCRAM-SHA-512", p.get("sasl.mechanism"));

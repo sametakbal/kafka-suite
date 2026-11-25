@@ -13,7 +13,10 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "sidecar": "node scripts/build-sidecar.mjs",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test:e2e": "node e2e/sidecar.e2e.mjs",
+    "kafka:up": "docker compose -f e2e/docker-compose.yml up -d",
+    "kafka:down": "docker compose -f e2e/docker-compose.yml down"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",

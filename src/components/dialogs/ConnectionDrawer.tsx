@@ -3,6 +3,7 @@ import { newConnection, useApp } from "../../state";
 import { api, asKError, secretKey, secrets, store } from "../../lib/rpc";
 import { ENV_COLOR, SWATCHES } from "../../lib/format";
 import { explain } from "../../lib/errors";
+import { usesSasl, usesSsl } from "../../lib/protocol";
 import { exportConnectionsToFile, importConnectionsFromFile, pickStore } from "../../lib/transfer";
 import type { ClusterInfo, Connection, Env, KError, SaslMechanism, SecurityProtocol } from "../../lib/types";
 import { Checkbox, Field, Icon, Segmented, Spinner, Switch } from "../ui";
@@ -10,7 +11,7 @@ import { Checkbox, Field, Icon, Segmented, Spinner, Switch } from "../ui";
 export const KEYCHAIN = /Mac/i.test(navigator.userAgent) ? "macOS Keychain" : /Windows/i.test(navigator.userAgent) ? "Windows Credential Manager" : "the system keyring";
 
 const PROTOCOLS: { value: SecurityProtocol; label: string }[] = [
-  { value: "PLAINTEXT", label: "PLAINTEXT" }, { value: "SSL", label: "SSL" },
+  { value: "NONE", label: "None" }, { value: "PLAINTEXT", label: "PLAINTEXT" }, { value: "SSL", label: "SSL" },
   { value: "SASL_PLAINTEXT", label: "SASL_PLAINTEXT" }, { value: "SASL_SSL", label: "SASL_SSL" },
 ];
 const MECHANISMS: SaslMechanism[] = ["PLAIN", "SCRAM-SHA-256", "SCRAM-SHA-512"];
@@ -40,8 +41,8 @@ export default function ConnectionDrawer({ connId }: { connId?: string }) {
   const set = (patch: Partial<Connection>) => setC((x) => ({ ...x, ...patch }));
   const setSsl = (patch: Partial<Connection["ssl"]>) => setC((x) => ({ ...x, ssl: { ...x.ssl, ...patch } }));
   const hasSaved = !!existing?.savePassword;
-  const sasl = c.securityProtocol.startsWith("SASL");
-  const ssl = c.securityProtocol.endsWith("SSL");
+  const sasl = usesSasl(c.securityProtocol);
+  const ssl = usesSsl(c.securityProtocol);
 
   const servers = c.bootstrap.split(/[,\s]+/).filter(Boolean);
   const errors = {
@@ -155,6 +156,11 @@ export default function ConnectionDrawer({ connId }: { connId?: string }) {
           <Field label="Security protocol">
             <Segmented<SecurityProtocol> mono fill value={c.securityProtocol} onChange={(v) => set({ securityProtocol: v })} options={PROTOCOLS} />
           </Field>
+          {c.securityProtocol === "NONE" && (
+            <div style={{ fontSize: 11.5, color: "var(--faint)", marginTop: -6 }}>
+              No security.protocol is set; the Kafka client falls back to its default (PLAINTEXT): no TLS, no authentication.
+            </div>
+          )}
         </section>
 
         {sasl && (

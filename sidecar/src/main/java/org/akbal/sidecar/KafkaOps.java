@@ -267,6 +267,16 @@ public final class KafkaOps {
         int count = Math.max(1, Math.min(10_000, p.path("count").asInt(1)));
 
         KafkaProducer<byte[], byte[]> producer = pool.get(text(p, "connId")).producer();
+        if (partition != null) {
+            // Without this check the producer waits max.block.ms for a partition that will never
+            // appear and fails with a TimeoutException, which reads like an unreachable cluster.
+            List<PartitionInfo> parts = producer.partitionsFor(topic);
+            int n = parts == null ? 0 : parts.size();
+            if (partition < 0 || partition >= n) {
+                throw Errors.named("PARTITION_NOT_FOUND", "Partition " + partition + " does not exist: topic " + topic
+                        + " has " + n + (n == 1 ? " partition (0)" : " partitions (0-" + (n - 1) + ")"));
+            }
+        }
         RecordMetadata last = null;
         for (int i = 0; i < count; i++) {
             var record = new ProducerRecord<>(topic, partition, key, value, headers);

@@ -1,0 +1,7 @@
+# Tek node'lu Kafka (KRaft) — sidecar E2E testleri için
+services:
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: kafka-suite-e2e
+    ports:
+      - "9092:9092"

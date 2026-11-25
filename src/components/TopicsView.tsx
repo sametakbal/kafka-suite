@@ -4,6 +4,7 @@ import { clock, n, wildcard } from "../lib/format";
 import type { TopicInfo } from "../lib/types";
 import ErrorView from "./ErrorView";
 import { Empty, Icon, Spinner, Switch } from "./ui";
+import { protocolLabel } from "../lib/protocol";
 
 type SortKey = "name" | "messages" | "partitions";
 
@@ -69,7 +70,7 @@ export default function TopicsView({ tab }: { tab: Tab }) {
             <span style={{ width: 8, height: 8, borderRadius: "50%", background: connected ? "var(--ok)" : "var(--faint)", boxShadow: connected ? "0 0 8px var(--ok)" : undefined }} />
             {connected ? "Connected" : st?.state === "connecting" ? "Connecting…" : "Disconnected"}
           </span>
-          <span className="mono ellipsis" style={{ fontSize: 11, color: "var(--faint)" }} title={st?.info?.clusterId}>{st?.info ? `cluster ${st.info.clusterId}` : conn.securityProtocol}</span>
+          <span className="mono ellipsis" style={{ fontSize: 11, color: "var(--faint)" }} title={st?.info?.clusterId}>{st?.info ? `cluster ${st.info.clusterId}` : protocolLabel(conn.securityProtocol)}</span>
         </div>
         <div className="stat">
           <span className="col-head">TOPICS</span>

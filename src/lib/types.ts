@@ -1,6 +1,7 @@
 export type Env = "DEV" | "TEST" | "PROD";
 
-export type SecurityProtocol = "PLAINTEXT" | "SSL" | "SASL_PLAINTEXT" | "SASL_SSL";
+/** NONE: no security.protocol is sent; the Kafka client uses its own default. */
+export type SecurityProtocol = "NONE" | "PLAINTEXT" | "SSL" | "SASL_PLAINTEXT" | "SASL_SSL";
 export type SaslMechanism = "PLAIN" | "SCRAM-SHA-256" | "SCRAM-SHA-512";
 
 export interface SslConfig {

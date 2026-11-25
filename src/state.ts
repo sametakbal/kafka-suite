@@ -5,6 +5,7 @@ import type {
   ClusterInfo, Connection, KError, KMessage, LiveBatch, LiveFailure, ProduceHeader, SaslMechanism, SecurityProtocol, Settings,
   Template, TopicInfo,
 } from "./lib/types";
+import { normalizeProtocol } from "./lib/protocol";
 
 export type ConnState = "disconnected" | "connecting" | "connected" | "error";
 
@@ -272,6 +273,8 @@ export const useApp = create<AppState>((set, get) => {
       for (const raw of incoming) {
         const base = newConnection();
         const c: Connection = { ...base, ...raw, ssl: { ...base.ssl, ...(raw.ssl ?? {}) } };
+        // A file without a protocol (or with an unknown one) imports as "None" rather than crashing the UI.
+        c.securityProtocol = "securityProtocol" in raw ? normalizeProtocol(raw.securityProtocol) : base.securityProtocol;
         const i = list.findIndex((x) => x.id === c.id || x.name === c.name);
         if (i >= 0) list[i] = { ...c, id: list[i].id };
         else {

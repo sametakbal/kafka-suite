@@ -4,6 +4,7 @@ import { clock, copyText } from "../lib/format";
 import { explain, logLine } from "../lib/errors";
 import type { KError } from "../lib/types";
 import { Icon } from "./ui";
+import { protocolLabel, usesSasl, usesSsl } from "../lib/protocol";
 
 const RETRY_SECONDS = 30;
 
@@ -42,11 +43,11 @@ export default function ErrorView({ connId, error, retryable, onRetry, topic, hi
   }, [left]);
 
   if (!conn) return null;
-  const sasl = conn.securityProtocol.startsWith("SASL");
-  const ssl = conn.securityProtocol.endsWith("SSL");
+  const sasl = usesSasl(conn.securityProtocol);
+  const ssl = usesSsl(conn.securityProtocol);
   const details = [
     { k: "Bootstrap", v: conn.bootstrap },
-    { k: "Security", v: sasl ? `${conn.securityProtocol} · ${conn.saslMechanism}` : conn.securityProtocol },
+    { k: "Security", v: protocolLabel(conn.securityProtocol, conn.saslMechanism) },
     ...(sasl && conn.username ? [{ k: "User", v: conn.username }] : []),
     ...(ssl ? [{ k: "Truststore", v: conn.ssl.truststore || "Java default CAs" }] : []),
     ...(ssl && conn.ssl.keystore ? [{ k: "Keystore", v: conn.ssl.keystore }] : []),

@@ -9,3 +9,5 @@ src-tauri/resources/
 .vscode/
 *.log
 .DS_Store
+e2e/last-result.json
+.claude/

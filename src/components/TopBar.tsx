@@ -1,5 +1,6 @@
 import { activeTabOf, connOf, useApp } from "../state";
 import { EnvBadge, Icon, StatusDot } from "./ui";
+import { isSecured } from "../lib/protocol";
 
 export default function TopBar() {
   const tab = useApp(activeTabOf);
@@ -20,7 +21,7 @@ export default function TopBar() {
 
   const canProduce = !!conn && status?.state === "connected";
   const topic = tab?.topic ?? "";
-  const secured = conn && conn.securityProtocol !== "PLAINTEXT";
+  const secured = conn && isSecured(conn.securityProtocol);
 
   return (
     <div style={{ height: 48, flex: "none", display: "flex", alignItems: "center", gap: 10, padding: "0 12px", background: "var(--panel)", borderBottom: "1px solid var(--line)" }}>

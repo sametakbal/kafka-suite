@@ -4,6 +4,7 @@ import { secretKey, secrets, store } from "../../lib/rpc";
 import type { Settings, Theme } from "../../lib/types";
 import { Icon, Switch } from "../ui";
 import { KEYCHAIN } from "./ConnectionDrawer";
+import { isSecured } from "../../lib/protocol";
 
 function Row({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
   return (
@@ -36,7 +37,7 @@ export default function SettingsDialog() {
   const connections = useApp((s) => s.connections);
   const { saveSettings, setOverlay, showToast } = useApp.getState();
   const [confirm, setConfirm] = useState(false);
-  const saved = connections.filter((c) => c.savePassword && c.securityProtocol !== "PLAINTEXT");
+  const saved = connections.filter((c) => c.savePassword && isSecured(c.securityProtocol));
 
   const forgetAll = async () => {
     for (const c of saved) {

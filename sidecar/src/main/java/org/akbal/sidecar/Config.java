@@ -21,6 +21,11 @@ public record Config(String id, String bootstrap, String securityProtocol, Strin
         return securityProtocol == null || securityProtocol.isBlank() ? "PLAINTEXT" : securityProtocol;
     }
 
+    /** The UI's "None" option: send no security.protocol at all. */
+    public boolean protocolUnset() {
+        return "NONE".equalsIgnoreCase(protocol());
+    }
+
     public boolean usesSasl() {
         return protocol().startsWith("SASL_");
     }
@@ -43,7 +48,10 @@ public record Config(String id, String bootstrap, String securityProtocol, Strin
         Properties p = new Properties();
         p.put("bootstrap.servers", servers());
         p.put("client.id", clientId);
-        p.put("security.protocol", protocol());
+        // "NONE": the user chose no protocol, so the client's own default applies.
+        if (!protocolUnset()) {
+            p.put("security.protocol", protocol());
+        }
         p.put("socket.connection.setup.timeout.ms", "5000");
         p.put("socket.connection.setup.timeout.max.ms", "10000");
         p.put("reconnect.backoff.max.ms", "2000");
