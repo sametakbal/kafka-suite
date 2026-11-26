@@ -1,6 +1,12 @@
 # Kafka Suite
 
-A desktop app for working with Apache Kafka clusters. You can list a cluster's topics, read the latest messages or tail new ones live, filter them with a small query language, inspect values and headers, create topics and produce test messages.
+An open-source, cross-platform desktop app for working with Apache Kafka clusters. Browse topics, inspect and filter messages, follow live traffic, and produce messages from one desktop interface. No separate server is required.
+
+[![Latest release](https://img.shields.io/github/v/release/sametakbal/kafka-suite?label=latest%20release)](https://github.com/sametakbal/kafka-suite/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release builds](https://github.com/sametakbal/kafka-suite/actions/workflows/release.yml/badge.svg)](https://github.com/sametakbal/kafka-suite/actions/workflows/release.yml)
+
+**[Download the latest release](https://github.com/sametakbal/kafka-suite/releases/latest)** · [Report a bug or request a feature](https://github.com/sametakbal/kafka-suite/issues/new)
 
 ![Reading user.events with a JSON message open](docs/screenshots/messages.png)
 
@@ -36,7 +42,7 @@ A desktop app for working with Apache Kafka clusters. You can list a cluster's t
 
 ## Installation
 
-Download the installer for your platform from [Releases](../../releases):
+Download the installer for your platform from [the latest release](https://github.com/sametakbal/kafka-suite/releases/latest):
 
 | Platform | Package |
 |----------|---------|
@@ -115,6 +121,12 @@ npm run tauri build
 
 On Windows this produces MSI and NSIS installers under `src-tauri/target/release/bundle/`. Pushing a `v*` tag runs `.github/workflows/release.yml`, which runs the tests, builds the Windows, Linux and macOS packages and attaches them to a GitHub release.
 
+## Contributing
+
+Bug reports, feature requests and pull requests are welcome. [Open an issue](https://github.com/sametakbal/kafka-suite/issues/new) to report a problem or suggest an improvement. For bug reports, include your operating system, Kafka Suite version and steps to reproduce; remove passwords, tokens and other sensitive values from logs or screenshots.
+
+For code changes, run the relevant checks from [Development](#development) before opening a pull request and describe what changed and how you tested it.
+
 ## License
 
-MIT
+Kafka Suite is released under the [MIT License](LICENSE).
