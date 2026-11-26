@@ -53,6 +53,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libdbus-1-dev libfuse2
 
+      # linuxdeploy (AppImage) resolves the bundled jlink runtime's .so files; libverify.so & co. need
+      # libjvm.so from runtime/lib/server, which it cannot find on its own ("Could not find dependency: libjvm.so").
+      - name: Let linuxdeploy find the bundled JVM libraries
+        if: runner.os == 'Linux'
+        run: echo "LD_LIBRARY_PATH=${{ github.workspace }}/src-tauri/resources/runtime/lib/server:${{ github.workspace }}/src-tauri/resources/runtime/lib" >> "$GITHUB_ENV"
+
       - name: Install npm packages
         run: npm ci
 
