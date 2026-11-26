@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { GEN_FUNCTIONS, hasPlaceholders, render } from "../../lib/generators";
 import { connOf, useApp, type Overlay, type ProduceDraft } from "../../state";
 import { produceAndReport } from "../../lib/drafts";
 import { b64ToBytes, bytes, n } from "../../lib/format";
@@ -43,7 +44,6 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
   });
   const [cursor, setCursor] = useState({ ln: 1, col: 1 });
   const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(0);
   const [templateName, setTemplateName] = useState<string | null>(null);
   const [activeTemplate, setActiveTemplate] = useState(opened?.name ?? "");
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -51,7 +51,9 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
   const setHeader = (i: number, p: Partial<ProduceHeader>) => setD((x) => ({ ...x, headers: x.headers.map((h, j) => (j === i ? { ...h, ...p } : h)) }));
 
   const binary = d.valueBase64 != null;
-  const v = binary ? { label: "Binary", ok: null } : validity(d.value);
+  const templated = !binary && [d.value, d.key, ...d.headers.map((h) => h.value)].some(hasPlaceholders);
+  // Placeholders are checked as they will be sent, so {"n": {{randomInt(1, 9)}}} counts as valid JSON.
+  const v = binary ? { label: "Binary", ok: null } : validity(render(d.value, { index: 1, now: Date.now() }));
   const size = binary ? b64ToBytes(d.valueBase64!).length : new TextEncoder().encode(d.value).length;
   const lines = useMemo<Tok[][]>(() => {
     const t = d.value.trimStart();
@@ -94,6 +96,18 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
     else setD((x) => ({ ...x, value: "", valueBase64: f.base64, fileName: f.name }));
   };
 
+  const insertAtCursor = (text: string) => {
+    const ta = taRef.current;
+    const s = ta?.selectionStart ?? d.value.length;
+    const e = ta?.selectionEnd ?? s;
+    setD((x) => ({ ...x, value: x.value.slice(0, s) + text + x.value.slice(e) }));
+    requestAnimationFrame(() => {
+      ta?.focus();
+      ta?.setSelectionRange(s + text.length, s + text.length);
+      trackCursor();
+    });
+  };
+
   const applyTemplate = (name: string) => {
     setActiveTemplate(name);
     const t = templates.find((x) => x.name === name);
@@ -111,16 +125,16 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
     showToast({ tone: "ok", title: `Draft "${name}" saved`, sub: draft.topic ? `Send it to ${draft.topic} from the Drafts list in one click` : undefined });
   };
 
-  // The dialog stays open after sending so the same message can be sent again, as in 1.x.
+  // Closes once the message is sent; the success toast reports it. On failure it stays open with the input intact.
   const send = async () => {
-    if (!topic.trim()) return;
+    if (!topic.trim() || sending) return;
     setSending(true);
     const ok = await produceAndReport(conn.id, {
       topic: topic.trim(), key: d.key === "" ? null : d.key, headers: d.headers, partition: d.partition, count: d.count,
       ...(binary ? { valueBase64: d.valueBase64 } : { value: d.value }),
     });
-    setSending(false);
-    if (ok) setSent((x) => x + d.count);
+    if (ok) setOverlay(null);
+    else setSending(false);
   };
 
   return (
@@ -137,7 +151,6 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
           <StatusDot state={st?.state} size={7} />{conn.name}<EnvBadge env={conn.env} />
         </span>
         <div className="spacer" />
-        {sent > 0 && <span className="mono" style={{ fontSize: 12, color: "var(--ok)", display: "flex", alignItems: "center", gap: 6 }}><Icon name="ph-check-circle" />{n(sent)} sent</span>}
         <button className="icon-btn" onClick={() => setOverlay(null)}><Icon name="ph-x" /></button>
       </div>
 
@@ -149,6 +162,7 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
               <Icon name={v.ok === false ? "ph-warning" : v.ok ? "ph-check" : "ph-text-aa"} />{v.label}
             </span>
             <div className="spacer" />
+            <FunctionsMenu disabled={binary} onPick={insertAtCursor} />
             <button className="btn outline sm" style={{ fontWeight: 400 }} onClick={formatJson} disabled={binary}><Icon name="ph-brackets-curly" color="var(--muted)" />Format JSON</button>
             <button className="btn outline sm" style={{ fontWeight: 400 }} onClick={formatXml} disabled={binary}><Icon name="ph-code" color="var(--muted)" />Format XML</button>
             <button className="btn outline sm" style={{ fontWeight: 400 }} onClick={() => void loadFile()}><Icon name="ph-file-arrow-up" color="var(--muted)" />Load file…</button>
@@ -249,11 +263,13 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
                 <input className="mono" value={d.count} onChange={(e) => setD((x) => ({ ...x, count: Math.max(1, Math.min(10000, Number(e.target.value.replace(/\D/g, "")) || 1)) }))} style={{ width: 52, textAlign: "center", fontSize: 12.5, border: "none", borderLeft: "1px solid var(--line)", borderRight: "1px solid var(--line)", height: "100%", background: "transparent", outline: "none" }} />
                 <span onClick={() => setD((x) => ({ ...x, count: Math.min(10000, x.count + 1) }))} style={{ width: 30, height: "100%", display: "grid", placeItems: "center", cursor: "pointer", color: "var(--muted)" }}><Icon name="ph-plus" /></span>
               </div>
-              <span style={{ fontSize: 11.5, color: "var(--faint)", lineHeight: 1.35 }}>Same record, sent this many times</span>
+              <span style={{ fontSize: 11.5, color: templated ? "var(--accent)" : "var(--faint)", lineHeight: 1.35 }}>
+                {templated ? "Functions are filled in anew for every message" : "Same record, sent this many times"}
+              </span>
             </div>
           </Field>
           <div style={{ marginTop: "auto", padding: 12, borderRadius: 6, border: "1px solid var(--line)", background: "var(--panel)", fontSize: 11.5, color: "var(--muted)", lineHeight: 1.5 }}>
-            <Icon name="ph-info" /> Sent with acks=all. The dialog stays open, so you can change the value and send again.
+            <Icon name="ph-info" /> Sent with acks=all. Functions such as <span className="mono">{"{{uuid}}"}</span> work in the value, key and header values. Save it as a draft to send it again later in one click.
           </div>
         </div>
       </div>
@@ -276,11 +292,45 @@ export default function ProduceDialog({ overlay }: { overlay: Extract<Overlay, {
         )}
         <div className="spacer" />
         {conn.env === "PROD" && <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--err)" }}><Icon name="ph-warning" />Target is a PROD cluster</span>}
-        <button className="btn outline lg" style={{ marginLeft: 8 }} onClick={() => setOverlay(null)}>{sent ? "Close" : "Cancel"}</button>
+        <button className="btn outline lg" style={{ marginLeft: 8 }} onClick={() => setOverlay(null)}>Cancel</button>
         <button className={`btn lg ${conn.env === "PROD" ? "prod" : "primary"}`} style={{ padding: "0 16px" }} onClick={() => void send()} disabled={sending || !topic.trim() || st?.state !== "connected"}>
-          {sending ? <Spinner /> : <Icon name="ph-paper-plane-tilt" />}{d.count > 1 ? `Send ${d.count} messages` : sent ? "Send again" : "Send message"}
+          {sending ? <Spinner /> : <Icon name="ph-paper-plane-tilt" />}{d.count > 1 ? `Send ${d.count} messages` : "Send message"}
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Picks a placeholder function to insert into the value. */
+function FunctionsMenu({ disabled, onPick }: { disabled: boolean; onPick: (text: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("mousedown", onDown);
+    return () => window.removeEventListener("mousedown", onDown);
+  }, [open]);
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button className="btn outline sm" style={{ fontWeight: 400 }} onClick={() => setOpen(!open)} disabled={disabled}>
+        <Icon name="ph-function" color="var(--muted)" />Functions<Icon name="ph-caret-down" color="var(--faint)" />
+      </button>
+      {open && (
+        <div className="popover" style={{ top: 30, right: 0, width: 400, display: "flex", flexDirection: "column", gap: 2 }}>
+          <div style={{ padding: "6px 10px 8px", fontSize: 11.5, color: "var(--muted)", lineHeight: 1.45 }}>
+            Filled in separately for every message sent. Also work in the key and header values.
+          </div>
+          {GEN_FUNCTIONS.map((f) => (
+            <div key={f.name} className="menu-item" onMouseDown={(e) => e.preventDefault()} onClick={() => { onPick(f.insert); setOpen(false); }}>
+              <span className="mono ellipsis" style={{ fontSize: 12, color: "var(--syn-key)" }}>{f.insert}</span>
+              <span style={{ marginLeft: "auto", fontSize: 11.5, color: "var(--faint)", flex: "none" }}>{f.description}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

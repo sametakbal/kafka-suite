@@ -208,11 +208,16 @@ async function kafkaCall(method: string, p: Record<string, unknown>): Promise<un
       need(p.connId);
       const name = String(p.topic);
       if (!topics.has(name)) throw err("UnknownTopicOrPartitionException", `Topic ${name} does not exist on this cluster`);
-      const count = Number(p.count ?? 1);
-      let last: RawMessage | null = null;
+      type Rec = { key: string | null; value: string | null; headers: { key: string; value: string }[] };
       const value = p.valueBase64 != null ? atob(String(p.valueBase64)) : p.value == null ? null : String(p.value);
-      for (let i = 0; i < count; i++) {
-        last = append(name, (p.key as string | null) ?? null, value, (p.headers as { key: string; value: string }[]) ?? [], (p.partition as number | null) ?? null);
+      const single: Rec = { key: (p.key as string | null) ?? null, value, headers: (p.headers as Rec["headers"]) ?? [] };
+      const records = Array.isArray(p.records) && p.records.length
+        ? (p.records as Rec[])
+        : Array.from({ length: Number(p.count ?? 1) }, () => single);
+      const count = records.length;
+      let last: RawMessage | null = null;
+      for (const r of records) {
+        last = append(name, r.key, r.value, r.headers, (p.partition as number | null) ?? null);
       }
       return { count, partition: last!.partition, offset: last!.offset, timestamp: last!.timestamp, elapsedMs: 9 };
     }

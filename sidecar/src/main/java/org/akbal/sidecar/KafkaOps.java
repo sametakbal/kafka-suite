@@ -257,13 +257,7 @@ public final class KafkaOps {
         } else {
             value = null;
         }
-        RecordHeaders headers = new RecordHeaders();
-        for (JsonNode h : p.path("headers")) {
-            String k = h.path("key").asText("").trim();
-            if (!k.isEmpty()) {
-                headers.add(k, h.hasNonNull("value") ? h.get("value").asText().getBytes(StandardCharsets.UTF_8) : null);
-            }
-        }
+        RecordHeaders headers = headers(p);
         int count = Math.max(1, Math.min(10_000, p.path("count").asInt(1)));
 
         KafkaProducer<byte[], byte[]> producer = pool.get(text(p, "connId")).producer();
@@ -278,11 +272,34 @@ public final class KafkaOps {
             }
         }
         RecordMetadata last = null;
-        for (int i = 0; i < count; i++) {
-            var record = new ProducerRecord<>(topic, partition, key, value, headers);
-            last = producer.send(record).get(30, TimeUnit.SECONDS);
+        JsonNode records = p.path("records");
+        if (records.isArray() && !records.isEmpty()) {
+            // The UI filled in placeholders ({{uuid}} …) per message: each entry is its own record.
+            count = Math.min(10_000, records.size());
+            for (int i = 0; i < count; i++) {
+                JsonNode r = records.get(i);
+                byte[] k = r.hasNonNull("key") ? r.get("key").asText().getBytes(StandardCharsets.UTF_8) : null;
+                byte[] v = r.hasNonNull("value") ? r.get("value").asText().getBytes(StandardCharsets.UTF_8) : null;
+                last = producer.send(new ProducerRecord<>(topic, partition, k, v, headers(r))).get(30, TimeUnit.SECONDS);
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                last = producer.send(new ProducerRecord<>(topic, partition, key, value, headers)).get(30, TimeUnit.SECONDS);
+            }
         }
         return new ProduceResult(count, last.partition(), last.offset(), last.timestamp(), (System.nanoTime() - t0) / 1_000_000);
+    }
+
+    /** Headers with a blank name are skipped; a null value is kept as null. */
+    static RecordHeaders headers(JsonNode p) {
+        RecordHeaders headers = new RecordHeaders();
+        for (JsonNode h : p.path("headers")) {
+            String k = h.path("key").asText("").trim();
+            if (!k.isEmpty()) {
+                headers.add(k, h.hasNonNull("value") ? h.get("value").asText().getBytes(StandardCharsets.UTF_8) : null);
+            }
+        }
+        return headers;
     }
 
     // ── params ──────────────────────────────────────────────

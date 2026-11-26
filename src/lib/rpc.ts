@@ -58,6 +58,8 @@ export interface ProduceInput {
   headers: ProduceHeader[];
   partition: number | null;
   count: number;
+  /** One entry per message, each sent in turn; when given, key, value, headers and count are ignored. */
+  records?: { key: string | null; value: string | null; headers: ProduceHeader[] }[];
 }
 
 export const api = {

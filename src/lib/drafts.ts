@@ -1,12 +1,22 @@
 // Producing messages and reporting the outcome, shared by the Produce dialog and one-click draft sends.
 import { useApp } from "../state";
 import { api, asKError, type ProduceInput } from "./rpc";
+import { hasPlaceholders, renderRecords } from "./generators";
 import type { Template } from "./types";
+
+/** With placeholders in a text value, key or header, every message gets its own rendered record. */
+function withRecords(input: ProduceInput): ProduceInput {
+  const headers = input.headers.filter((h) => h.key.trim());
+  const templated = input.valueBase64 == null
+    && [input.value, input.key, ...headers.map((h) => h.value)].some(hasPlaceholders);
+  if (!templated) return { ...input, headers };
+  return { ...input, headers, records: renderRecords({ key: input.key, value: input.value ?? null, headers }, input.count) };
+}
 
 export async function produceAndReport(connId: string, input: ProduceInput, label?: string): Promise<boolean> {
   const { showToast, openMessages, loadTopics } = useApp.getState();
   try {
-    const r = await api.produce(connId, { ...input, headers: input.headers.filter((h) => h.key.trim()) });
+    const r = await api.produce(connId, withRecords(input));
     const what = r.count > 1 ? `${r.count} messages` : "Message";
     showToast({
       tone: "ok",
