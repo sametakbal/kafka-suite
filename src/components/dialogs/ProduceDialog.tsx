@@ -319,7 +319,7 @@ function FunctionsMenu({ disabled, onPick }: { disabled: boolean; onPick: (text:
         <Icon name="ph-function" color="var(--muted)" />Functions<Icon name="ph-caret-down" color="var(--faint)" />
       </button>
       {open && (
-        <div className="popover" style={{ top: 30, right: 0, width: 400, display: "flex", flexDirection: "column", gap: 2 }}>
+        <div className="popover" style={{ top: 30, left: 0, width: 400, display: "flex", flexDirection: "column", gap: 2 }}>
           <div style={{ padding: "6px 10px 8px", fontSize: 11.5, color: "var(--muted)", lineHeight: 1.45 }}>
             Filled in separately for every message sent. Also work in the key and header values.
           </div>

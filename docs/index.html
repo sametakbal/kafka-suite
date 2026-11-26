@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kafka Suite — desktop client for Apache Kafka</title>
+<meta name="description" content="Kafka Suite is a free, open-source desktop app for Apache Kafka: browse topics, tail messages live, filter with a query language and produce test messages. Windows, macOS and Linux." />
+<meta property="og:title" content="Kafka Suite — desktop client for Apache Kafka" />
+<meta property="og:description" content="Kafka Suite is a free, open-source desktop app for Apache Kafka: browse topics, tail messages live, filter with a query language and produce test messages. Windows, macOS and Linux." />
+<meta property="og:image" content="https://sametakbal.github.io/kafka-suite/screenshots/messages.png" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#0d0f12" />
+<link rel="icon" type="image/png" href="assets/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" />
+<style>
+html{scroll-behavior:smooth}
+body{margin:0;background:#0d0f12}
+.ks{--bg:#0d0f12;--alt:#121519;--panel:#16191d;--line:#262a31;--text:#e4e7eb;--muted:#a3aab4;--acc:#4cc9d1;--acc-ink:#04191c;--org:#f2803a;
+background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.ks *{box-sizing:border-box}
+.ks a{color:var(--acc);text-decoration:none}
+.ks a:hover{color:#8fe3e8}
+.ks code,.ks pre{font-family:"JetBrains Mono",ui-monospace,monospace}
+.ks code{font-size:.88em;background:#1e2227;padding:1px 6px;border-radius:5px;color:#d6dadf}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+.nav{position:sticky;top:0;z-index:10;background:rgba(13,15,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
+.ks .brand{display:flex;align-items:center;gap:10px;color:var(--text);font-weight:600;font-size:17px}
+.brand img{display:block}
+.nav-links{display:flex;align-items:center;gap:26px}
+.ks .nav-links a{color:var(--muted);font-size:15px}
+.ks .nav-links a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:0 22px;border-radius:10px;font-weight:600;font-size:16px;border:1px solid transparent}
+.btn-sm{min-height:38px;padding:0 14px;font-size:14px}
+.ks .btn-primary{background:var(--acc);color:var(--acc-ink)}
+.ks .btn-primary:hover{background:#7adbe1;color:var(--acc-ink)}
+.ks .btn-ghost{border-color:#343a43;color:var(--text)}
+.ks .btn-ghost:hover{border-color:var(--acc);color:var(--text)}
+.ks .nav-links .btn-ghost{color:var(--text)}
+.hero{padding:96px 0 40px;text-align:center;background:radial-gradient(900px 420px at 50% -60px,rgba(76,201,209,.16),transparent 70%)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 0 24px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;font:500 13px/1.4 "JetBrains Mono",monospace;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:#5fd38a}
+.hero h1{margin:0 auto;max-width:880px;font-size:64px;line-height:1.06;letter-spacing:-.025em;font-weight:700}
+.acc{color:var(--acc)}
+.lead{max-width:680px;margin:24px auto 0;font-size:20px;color:var(--muted)}
+.cta{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-top:36px}
+.platforms{margin:18px 0 0;font-size:14px;color:var(--muted)}
+.shot{display:block;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--panel);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.shot img{display:block;width:100%;height:auto}
+.hero-shot{margin-top:64px}
+.sec{padding:110px 0}
+.sec-alt{background:var(--alt);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.kicker{margin:0 0 12px;font:600 13px/1.4 "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--org);text-align:center}
+.sec h2{margin:0 auto 56px;max-width:760px;font-size:42px;line-height:1.15;letter-spacing:-.02em;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.card{padding:26px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.ic{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;background:rgba(76,201,209,.1);color:var(--acc)}
+.card h3{margin:18px 0 8px;font-size:18px}
+.card p{margin:0;font-size:15px;color:var(--muted)}
+.split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:center}
+.split .kicker,.split h2{text-align:left;margin-left:0}
+.split h2{margin-bottom:18px}
+.body{margin:0;color:var(--muted)}
+.center{text-align:center;margin:-36px auto 40px;max-width:620px}
+.code{margin:24px 0 0;padding:22px 24px;background:#0a0c0e;border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.75;color:#e4e7eb;overflow-x:auto;white-space:pre}
+.code .c{color:#7d848e}
+.gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 28px}
+.gallery figure{margin:0}
+.gallery .shot{box-shadow:0 18px 50px rgba(0,0,0,.4)}
+.gallery figcaption{margin-top:14px;font-size:15px;color:var(--muted)}
+.gallery b{color:var(--text)}
+.dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;max-width:900px;margin:0 auto}
+.ks .dl-card{display:flex;flex-direction:column;gap:6px;padding:28px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text)}
+.ks .dl-card:hover{border-color:var(--acc);color:var(--text)}
+.os{font-size:22px;font-weight:600}
+.pk{font:14px/1.5 "JetBrains Mono",monospace;color:var(--muted)}
+.note{margin:28px auto 0;text-align:center;font-size:15px;color:var(--muted)}
+.arch{display:grid;grid-template-columns:minmax(0,1fr) 220px minmax(0,1fr);align-items:center;gap:0}
+.arch-box{display:flex;flex-direction:column;gap:8px;padding:28px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.arch-box b{font-size:20px}
+.arch-box span:last-child{font-size:15px;color:var(--muted)}
+.tag{align-self:flex-start;padding:3px 10px;border-radius:6px;font:600 12px/1.5 "JetBrains Mono",monospace;background:rgba(76,201,209,.12);color:var(--acc)}
+.tag-o{background:rgba(242,128,58,.12);color:var(--org)}
+.arch-link{display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 12px;font:12px/1.4 "JetBrains Mono",monospace;color:var(--muted);text-align:center}
+.arch-link i{display:block;width:100%;height:2px;background:linear-gradient(90deg,var(--acc),var(--org))}
+.dev{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:56px;align-items:center;margin-top:72px}
+.dev h3{margin:0 0 8px;font-size:22px}
+.dev .code{margin:0}
+.foot{padding:40px 0;border-top:1px solid var(--line)}
+.foot-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.foot p{margin:0;font-size:14px;color:var(--muted)}
+#generate{background:var(--bg)}
+.sec-alt+#generate{border-top:0}
+.split-rev{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}
+.fn-list{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;list-style:none}
+.ks .fn-list code{display:inline-block;padding:4px 10px;border:1px solid var(--line);background:var(--panel);color:#cfe9eb;font-size:13px}
+.gen{display:flex;flex-direction:column;gap:10px}
+.gen-pane .code{margin:0}
+.gen-label{margin:0 0 8px;font:500 12px/1.4 "JetBrains Mono",monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.gen-label b{color:var(--acc)}
+.code .fn{color:var(--acc)}
+.code .out{color:#f6a56e}
+.gen-arrow{display:flex;justify-content:center;color:var(--muted)}
+.ks .btn-coffee{background:#ffdd00;color:#1a1600}
+.ks .btn-coffee:hover{background:#ffe740;color:#1a1600}
+.ks .nav-links .btn-coffee{color:#1a1600}
+.support{padding:0 0 110px}
+.support-in{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:32px;padding:44px 48px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(255,221,0,.07),rgba(76,201,209,.06)),var(--panel)}
+.support-in>div:first-child{flex:1 1 420px;min-width:0}
+.support h2{margin:0 0 10px;font-size:30px;line-height:1.2;letter-spacing:-.015em}
+.support .body{max-width:560px}
+.support-cta{display:flex;flex-wrap:wrap;gap:12px}
+@media (max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.split,.split-rev,.dev{grid-template-columns:minmax(0,1fr)}.hero h1{font-size:48px}}
+@media (max-width:680px){.hide-sm{display:none}.ks .nav-links .btn-coffee{padding:0 11px}.support-in{padding:32px 24px}.support h2{font-size:26px}.nav-links a:not(.btn){display:none}.grid,.gallery,.dl{grid-template-columns:minmax(0,1fr)}.arch{grid-template-columns:minmax(0,1fr)}.arch-link{padding:18px 0}.arch-link i{width:2px;height:28px}.hero{padding-top:64px}.hero h1{font-size:38px}.lead{font-size:18px}.sec{padding:80px 0}.sec h2{font-size:32px}}
+</style>
+</head>
+<body>
+<div class="ks">
+<header class="nav">
+<div class="wrap nav-in">
+<a class="brand" href="#top"><img src="assets/logo.png" alt="" width="32" height="32" /><span>Kafka Suite</span></a>
+<nav class="nav-links" aria-label="Main">
+<a href="#features">Features</a>
+<a href="#query">Query</a>
+<a href="#generate">Test data</a>
+<a href="#screenshots">Screenshots</a>
+<a href="#install">Install</a>
+<a class="btn btn-coffee btn-sm" href="https://buymeacoffee.com/sametakbal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a4 4 0 0 1 0 8h-1"></path><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path><path d="M6 2v2"></path><path d="M10 2v2"></path><path d="M14 2v2"></path></svg><span class="hide-sm">Buy me a coffee</span></a>
+<a class="btn btn-ghost btn-sm" href="https://github.com/sametakbal/kafka-suite"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"></path></svg>GitHub</a>
+</nav>
+</div>
+</header>
+
+<section class="hero" id="top">
+<div class="wrap">
+<p class="eyebrow"><span class="dot"></span>Free &amp; open source · MIT</p>
+<h1>A fast desktop client for your <span class="acc">Kafka</span> clusters.</h1>
+<p class="lead">Browse topics, read the latest messages or tail new ones live, filter them with a small query language, and produce realistic test data. No server, no consumer groups, nothing to install besides the app.</p>
+<div class="cta">
+<a class="btn btn-primary" href="https://github.com/sametakbal/kafka-suite/releases/latest"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>Download</a>
+<a class="btn btn-ghost" href="https://github.com/sametakbal/kafka-suite">View source on GitHub</a>
+</div>
+<p class="platforms">Windows · macOS · Linux — Java runtime and Kafka client bundled</p>
+<div class="shot hero-shot"><img src="screenshots/messages.png" alt="Kafka Suite reading the user.events topic with a JSON message open" width="1600" height="980" /></div>
+</div>
+</section>
+
+<section class="sec" id="features">
+<div class="wrap">
+<p class="kicker">Features</p>
+<h2>Everything you reach for when debugging a topic.</h2>
+<div class="grid">
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg></div><h3>Clusters in folders</h3><p>Group connections and tag each one DEV, TEST or PROD with a colour. Export and import them as JSON — passwords never included.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></div><h3>SASL, TLS &amp; keychain</h3><p>PLAINTEXT, SSL, SASL_PLAINTEXT and SASL_SSL with PLAIN or SCRAM. JKS, PKCS#12 or PEM stores. Secrets live in the OS keychain.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg></div><h3>Latest messages</h3><p>Opening a topic reads its newest messages across all partitions. Partitions are assigned directly: no consumer group, nothing committed.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg></div><h3>Live tail</h3><p>Watch new messages arrive, newest first, with a configurable buffer. Each partition gets its own colour.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8Z"></path></svg></div><h3>Query language</h3><p>Filter on JSON fields, arrays and nulls with <code>and</code>, <code>or</code>, <code>not</code> and <code>contains</code>. Plain text searches keys and values.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4"></path><path d="m16 8 4 4-4 4"></path><path d="m14 4-4 16"></path></svg></div><h3>Text, JSON, XML, Hex</h3><p>Inspect values, keys and headers in the format they are in. Optionally show CR, LF, TAB, SOH, NUL as visible markers.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4Z"></path></svg></div><h3>Produce &amp; drafts</h3><p>A highlighted editor with key, partition and headers. Save drafts and send them in one click — PROD clusters ask first.</p></article>
+<article class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5"></path><path d="M12 16h.01"></path></svg></div><h3>Errors that explain</h3><p>Timeouts, SASL, TLS and authorization failures show their likely causes and retry automatically.</p></article>
+</div>
+</div>
+</section>
+
+<section class="sec sec-alt" id="query">
+<div class="wrap split">
+<div class="split-text">
+<p class="kicker">Query language</p>
+<h2>Find the one message you need.</h2>
+<p class="body">Type a filter over the message value and the list narrows as you go. Nested fields, array indexes, null checks and negation all work.</p>
+<pre class="code"><span class="c"># nested fields and logic</span>
+profile.age &gt; 25 and username = "johndoe"
+
+<span class="c"># arrays</span>
+languages contains "Python"
+roles[0].roleName = Admin
+
+<span class="c"># nulls and negation</span>
+phoneNumber is not null
+not (isActive = true)</pre>
+</div>
+<div class="shot"><img src="screenshots/query.png" alt="Messages filtered with profile.age greater than 30 and languages contains Go" width="1600" height="980" /></div>
+</div>
+</section>
+
+<section class="sec" id="generate">
+<div class="wrap split split-rev">
+<div class="split-text">
+<p class="kicker">New · Test data</p>
+<h2>Send a thousand different messages in one click.</h2>
+<p class="body">Drop functions like <code>{{uuid}}</code> or <code>{{randomInt(1, 100)}}</code> into the value, key or header values. Set a send count and every message is filled in anew — JSON validation still checks the result.</p>
+<ul class="fn-list">
+<li><code>{{uuid}}</code></li>
+<li><code>{{randomString(12)}}</code></li>
+<li><code>{{randomInt(1, 1000)}}</code></li>
+<li><code>{{randomDecimal(0, 100, 2)}}</code></li>
+<li><code>{{randomBool}}</code></li>
+<li><code>{{randomItem(red, green, blue)}}</code></li>
+<li><code>{{index}}</code></li>
+<li><code>{{timestamp}}</code></li>
+<li><code>{{now}}</code></li>
+</ul>
+</div>
+<div class="gen">
+<div class="gen-pane">
+<p class="gen-label">Value · send count <b>1000</b></p>
+<pre class="code">{
+  "orderId": "<span class="fn">{{uuid}}</span>",
+  "seq": <span class="fn">{{index}}</span>,
+  "amount": <span class="fn">{{randomDecimal(5, 500, 2)}}</span>,
+  "status": "<span class="fn">{{randomItem(NEW, PAID, SHIPPED)}}</span>",
+  "createdAt": "<span class="fn">{{now}}</span>"
+}</pre>
+</div>
+<div class="gen-arrow" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg></div>
+<div class="gen-pane">
+<p class="gen-label">Message 2 of 1000</p>
+<pre class="code">{
+  "orderId": "<span class="out">9b2e4f1c-7a30-4d8e-b5c2-1f6a0e93d7b4</span>",
+  "seq": <span class="out">2</span>,
+  "amount": <span class="out">218.47</span>,
+  "status": "<span class="out">PAID</span>",
+  "createdAt": "<span class="out">2026-11-26T17:42:08.311Z</span>"
+}</pre>
+</div>
+</div>
+</div>
+</section>
+
+<section class="sec" id="screenshots">
+<div class="wrap">
+<p class="kicker">Screenshots</p>
+<h2>A closer look.</h2>
+<div class="gallery">
+<figure><a class="shot" href="screenshots/topics.png"><img src="screenshots/topics.png" alt="Topic list with cluster stats" loading="lazy" /></a><figcaption><b>Topics</b> — partitions, replication, retained messages</figcaption></figure>
+<figure><a class="shot" href="screenshots/live-tail.png"><img src="screenshots/live-tail.png" alt="Live tail of a topic" loading="lazy" /></a><figcaption><b>Live tail</b> — new messages as they arrive</figcaption></figure>
+<figure><a class="shot" href="screenshots/produce.png"><img src="screenshots/produce.png" alt="Produce message dialog" loading="lazy" /></a><figcaption><b>Produce</b> — value editor, key, partition, headers</figcaption></figure>
+<figure><a class="shot" href="screenshots/overview.png"><img src="screenshots/overview.png" alt="Overview of all clusters" loading="lazy" /></a><figcaption><b>Overview</b> — every cluster at a glance</figcaption></figure>
+<figure><a class="shot" href="screenshots/light-xml.png"><img src="screenshots/light-xml.png" alt="Light theme showing an XML value" loading="lazy" /></a><figcaption><b>Light theme</b> — XML value with highlighting</figcaption></figure>
+<figure><a class="shot" href="screenshots/connection.png"><img src="screenshots/connection.png" alt="Connection settings with SASL and TLS" loading="lazy" /></a><figcaption><b>Connection</b> — SASL, TLS stores, keychain</figcaption></figure>
+</div>
+</div>
+</section>
+
+<section class="sec sec-alt" id="install">
+<div class="wrap">
+<p class="kicker">Install</p>
+<h2>Download, open, connect.</h2>
+<p class="body center">The Apache Kafka client and a Java runtime are bundled, so there is nothing else to install.</p>
+<div class="dl">
+<a class="dl-card" href="https://github.com/sametakbal/kafka-suite/releases/latest"><span class="os">Windows</span><span class="pk">.msi · -setup.exe</span></a>
+<a class="dl-card" href="https://github.com/sametakbal/kafka-suite/releases/latest"><span class="os">macOS</span><span class="pk">.dmg</span></a>
+<a class="dl-card" href="https://github.com/sametakbal/kafka-suite/releases/latest"><span class="os">Linux</span><span class="pk">.deb · .rpm · .AppImage</span></a>
+</div>
+<p class="note">Upgrading from 1.x? Saved connections are imported on first start and their passwords move to the OS keychain.</p>
+</div>
+</section>
+
+<section class="sec" id="architecture">
+<div class="wrap">
+<p class="kicker">Under the hood</p>
+<h2>Runs entirely on your machine.</h2>
+<div class="arch">
+<div class="arch-box"><span class="tag">Tauri · Rust</span><b>React UI</b><span>Keychain, local JSON files, file dialogs, live-tail events to the webview</span></div>
+<div class="arch-link" aria-hidden="true"><span>line-delimited JSON</span><i></i><span>stdin / stdout</span></div>
+<div class="arch-box"><span class="tag tag-o">Java 21 sidecar</span><b>Apache Kafka client</b><span>Admin, consumer (assign), producer and live tail — one client pool per cluster</span></div>
+</div>
+<div class="dev">
+<div>
+<h3>Build from source</h3>
+<p class="body">Requires Node 22+, Rust (stable) and JDK 21+. Maven isn't needed.</p>
+</div>
+<pre class="code">npm install
+npm run sidecar      <span class="c"># sidecar jar + jlink runtime</span>
+npm run tauri dev    <span class="c"># start the app</span></pre>
+</div>
+</div>
+</section>
+
+<section class="support" id="support">
+<div class="wrap"><div class="support-in">
+<div>
+<h2>Kafka Suite saves you time?</h2>
+<p class="body">It's free and built in my spare time. If it helps your work, a coffee keeps new releases coming — and a star on GitHub helps others find it.</p>
+</div>
+<div class="support-cta">
+<a class="btn btn-coffee" href="https://buymeacoffee.com/sametakbal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a4 4 0 0 1 0 8h-1"></path><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path><path d="M6 2v2"></path><path d="M10 2v2"></path><path d="M14 2v2"></path></svg>Buy me a coffee</a>
+<a class="btn btn-ghost" href="https://github.com/sametakbal/kafka-suite"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9Z"></path></svg>Star on GitHub</a>
+</div>
+</div>
+</div>
+</section>
+
+<footer class="foot">
+<div class="wrap foot-in">
+<a class="brand" href="#top"><img src="assets/logo.png" alt="" width="28" height="28" /><span>Kafka Suite</span></a>
+<p>MIT licensed · built by <a href="https://github.com/sametakbal">Samet Akbal</a> · <a href="https://github.com/sametakbal/kafka-suite/issues">Report an issue</a> · <a href="https://buymeacoffee.com/sametakbal">Buy me a coffee</a></p>
+</div>
+</footer>
+</div>
+
+</body>
+</html>

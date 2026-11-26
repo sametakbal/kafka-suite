@@ -13,7 +13,7 @@ An open-source, cross-platform desktop app for working with Apache Kafka cluster
 ## Features
 
 - **Clusters:** Organise them in folders and tag each one as DEV, TEST or PROD with a colour. Selecting a cluster connects it. Connections can be exported to JSON and imported on another machine; passwords are never included in exports.
-- **Security:** PLAINTEXT, SSL, SASL_PLAINTEXT and SASL_SSL with SASL PLAIN, SCRAM-SHA-256 or SCRAM-SHA-512. TLS takes a truststore and an optional client keystore (JKS, PKCS#12 or PEM); host name verification can be turned off for test clusters.
+- **Security:** None, PLAINTEXT, SSL, SASL_PLAINTEXT and SASL_SSL with SASL PLAIN, SCRAM-SHA-256 or SCRAM-SHA-512. TLS takes a truststore and an optional client keystore (JKS, PKCS#12 or PEM); host name verification can be turned off for test clusters. With **None**, no `security.protocol` is sent and the Kafka client uses its own default.
 - **Passwords in the OS keychain:** Windows Credential Manager, macOS Keychain or Secret Service on Linux, under the service name `kafka-suite`.
 - **Overview and topics:** Connected clusters with their real broker counts. Each cluster lists its topics with partitions, replication factor and retained message count, a search (`orders.*` works) and an option to hide internal topics.
 - **Latest messages:** Opening a topic reads its newest messages across all partitions (50 by default). Partitions are assigned directly, so no consumer group is created and nothing is committed.
@@ -21,11 +21,49 @@ An open-source, cross-platform desktop app for working with Apache Kafka cluster
 - **Query language:** Filter on JSON values, e.g. `profile.age > 25 and username = "johndoe"`, `languages contains "Python"`, `roles[0].roleName = Admin`, `phoneNumber is not null`, `not (isActive = true)`. Text without operators searches keys and values.
 - **Message details:** The value can be shown as Text, JSON, XML or Hex, with a tab each for the key and the headers. Each partition gets its own colour.
 - **Control characters:** Optionally shows CR, LF, TAB and ASCII controls such as SOH, STX and NUL as visible markers.
-- **Produce:** A syntax-highlighted editor with JSON/XML formatting and loading a value from a file (binary too). You can set the key, the partition and headers, and send several copies. The dialog stays open, so you can send again.
+- **Produce:** A syntax-highlighted editor with JSON/XML formatting and loading a value from a file (binary too). You can set the key, the partition and headers, and send up to 10,000 messages at once.
+- **Generated test data:** Functions such as `{{uuid}}`, `{{randomInt(1, 100)}}` or `{{now}}` in the value, key or header values are filled in anew for every message sent, so one send produces varied records. See [Generating test data](#generating-test-data).
 - **Drafts:** Saved sample messages that remember their topic and cluster. Send one in a single click from the sidebar; PROD clusters ask first.
 - **Create topic:** Partitions, replication factor and topic configs, with the common ones (`retention.ms`, `cleanup.policy`, …) one click away.
 - **Error screens:** Show what failed (timeout, SASL, TLS, authorization…), its likely causes and a countdown to an automatic retry.
 - Dark, light or system theme; `Ctrl+K` to search topics, clusters, drafts and message keys.
+
+## Generating test data
+
+The Produce dialog's **Functions** menu inserts placeholders at the cursor. They work in the value, the key and header values, and are filled in separately for every message, so **Send count** produces that many different records instead of copies of one. The value is checked as JSON with the placeholders filled in, so `"userId": {{randomInt(1000, 9999)}}` still counts as valid JSON.
+
+![Functions menu in the Produce dialog](docs/screenshots/produce-functions.png)
+
+| Function | Result |
+|----------|--------|
+| `{{uuid}}` | Random UUID v4 |
+| `{{randomString(12)}}` | Letters and digits of the given length |
+| `{{randomInt(1, 1000)}}` | Whole number from min to max |
+| `{{randomDecimal(0, 100, 2)}}` | Number from min to max, with the given number of decimals |
+| `{{randomBool}}` | `true` or `false` |
+| `{{randomItem(red, green, blue)}}` | One of the given values |
+| `{{index}}` | Message number within this send: 1, 2, 3… |
+| `{{timestamp}}` | Epoch milliseconds |
+| `{{now}}` | ISO 8601 date and time |
+
+An unknown name, or arguments that do not fit, are sent as written. Drafts keep their placeholders, so a draft sent from the sidebar gets fresh values each time.
+
+For example, this value with a send count of 5 produces five messages, each with its own `eventId`, `userId`, `plan` and `sequence`:
+
+```text
+{
+  "eventId": "{{uuid}}",
+  "userId": {{randomInt(1000, 9999)}},
+  "username": "user_{{randomString(6)}}",
+  "plan": "{{randomItem(free, pro, team)}}",
+  "score": {{randomDecimal(0, 100, 2)}},
+  "isActive": {{randomBool}},
+  "sequence": {{index}},
+  "createdAt": "{{now}}"
+}
+```
+
+![The five generated messages at the top of user.events](docs/screenshots/produce-generated.png)
 
 ## Screenshots
 
@@ -34,11 +72,13 @@ An open-source, cross-platform desktop app for working with Apache Kafka cluster
 | ![Topic list with cluster stats](docs/screenshots/topics.png) | ![Live tail](docs/screenshots/live-tail.png) |
 | **Topics**: partitions, replication, retained messages, broker info | **Live tail**: new messages as they arrive, no consumer group |
 | ![Query filter](docs/screenshots/query.png) | ![Produce message](docs/screenshots/produce.png) |
-| **Query**: `profile.age > 30 and languages contains "Go"` | **Produce**: value editor, key, partition, headers, drafts |
+| **Query**: `profile.age > 30 and languages contains "Go"` | **Produce**: value editor, key, partition, headers, functions |
 | ![Overview of clusters](docs/screenshots/overview.png) | ![Light theme with an XML value](docs/screenshots/light-xml.png) |
 | **Overview**: every cluster at a glance | **Light theme**: XML value with highlighting |
 | ![Connection settings](docs/screenshots/connection.png) | ![Cluster not reachable](docs/screenshots/error.png) |
 | **Connection**: SASL, TLS stores, keychain | **Errors**: likely causes, automatic retry |
+| ![Connection with the None security protocol](docs/screenshots/connection-none.png) | |
+| **None**: no `security.protocol`, the client's default applies | |
 
 ## Installation
 
